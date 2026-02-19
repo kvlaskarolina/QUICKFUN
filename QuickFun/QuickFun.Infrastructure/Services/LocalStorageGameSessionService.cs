@@ -1,5 +1,4 @@
 using Blazored.LocalStorage;
-using QuickFun.Application.Interfaces;
 using QuickFun.Domain.Entities;
 
 namespace QuickFun.Infrastructure.Services;
