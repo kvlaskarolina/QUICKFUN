@@ -1,12 +1,14 @@
+using System;
+using System.Threading.Tasks;
 using QuickFun.Domain.Entities;
-using QuickFun.Domain.Enums;
 
-namespace QuickFun.Application.Interfaces;
-
-public interface IGameSessionService
+namespace QuickFun.Application.Interfaces
 {
-    Task SavePlayerNameAsync(string name);
-    Task<string> GetPlayerNameAsync();
-    Task AddGameResultAsync(GameResult result);
-    Task<List<GameResult>> GetSessionHistoryAsync();
+    public interface IGameSessionService
+    {
+        Task<bool> StartGameAsync(Guid roomId);
+        Task<bool> EndGameAsync(Guid roomId);
+        Task<string> GetGameStatusAsync(Guid roomId);
+        Task AddGameResultAsync(GameResult result);
+    }
 }

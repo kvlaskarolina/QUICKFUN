@@ -3,6 +3,7 @@
 @using QuickFun.Domain.Enums
 @using QuickFun.Application.Interfaces
 @using QuickFun.Domain.Entities
+@using QuickFun.Infrastructure.Services
 @inject IGameSessionService SessionService
 
 @namespace QuickFun.Web.Components.Views
@@ -38,55 +39,54 @@
             </button>
         </div>
         @* DYNAMICZNY GRID: Liczba kolumn zależy od wybranej strategii *@
-    <div class="board-memory" style="grid-template-columns: repeat(@Engine.Columns, 1fr);">
-        @foreach (var card in Engine.Cards)
-        {
-            <button class="memory-card @(card.IsRevealed || card.IsMatched ? "flipped" : "")"
-                    @onclick="() => OnCardClick(card)"
-                    disabled="@(Engine.IsGameOver || card.IsMatched)">
-                
-                @if (card.IsRevealed || card.IsMatched)
-                {
-                    <img src="@card.ImageUrl" class="card-img" />
-                }
-                else
-                {
-                    <span class="card-back">?</span>
-                }
-            </button>
-        }
-    </div>
-}
+        <div class="board-memory" style="grid-template-columns: repeat(@Engine.Columns, 1fr);">
+            @foreach (var card in Engine.Cards)
+            {
+                <button class="memory-card @(card.IsRevealed || card.IsMatched ? "flipped" : "")"
+                    @onclick="() => OnCardClick(card)" disabled="@(Engine.IsGameOver || card.IsMatched)">
+
+                    @if (card.IsRevealed || card.IsMatched)
+                    {
+                        <img src="@card.ImageUrl" class="card-img" />
+                    }
+                    else
+                    {
+                        <span class="card-back">?</span>
+                    }
+                </button>
+            }
+        </div>
+    }
 </div>
 @code {
-[Parameter] public MemoryEngine Engine { get; set; } = default!;
-private bool isDifficultySelected = false;
-private async Task SelectDifficulty(IMemoryDifficultyStrategy strategy)
-{
-    isDifficultySelected = true;
-    Engine.SetDifficulty(strategy);
-
-    await Engine.Start(() => InvokeAsync(StateHasChanged));
-}
-
-protected override void OnInitialized()
-{
-    // Nie odpalamy Engine.Start() tutaj, bo czekamy na wybór poziomu
-}
-
-private async Task OnCardClick(MemoryCard card)
-{
-    await Engine.HandleCardClick(card);
-
-    if (Engine.IsGameOver)
+    [Parameter] public MemoryEngine Engine { get; set; } = default!;
+    private bool isDifficultySelected = false;
+    private async Task SelectDifficulty(IMemoryDifficultyStrategy strategy)
     {
-        await SessionService.AddGameResultAsync(new GameResult
-        {
-            Type = Engine.Type,
-            Score = Engine.Score
-        });
+        isDifficultySelected = true;
+        Engine.SetDifficulty(strategy);
+
+        await Engine.Start(() => InvokeAsync(StateHasChanged));
     }
-}
+
+    protected override void OnInitialized()
+    {
+        // Nie odpalamy Engine.Start() tutaj, bo czekamy na wybór poziomu
+    }
+
+    private async Task OnCardClick(MemoryCard card)
+    {
+        await Engine.HandleCardClick(card);
+
+        if (Engine.IsGameOver)
+        {
+            await SessionService.AddGameResultAsync(new GameResult
+            {
+                Type = Engine.Type,
+                Score = Engine.Score
+            });
+        }
+    }
 }
 
 <style>
@@ -119,12 +119,27 @@ private async Task OnCardClick(MemoryCard card)
         font-size: 1.1rem;
     }
 
-    .btn-diff:hover { transform: scale(1.02); }
-    .btn-diff small { display: block; font-weight: normal; opacity: 0.8; }
+    .btn-diff:hover {
+        transform: scale(1.02);
+    }
 
-    .easy { background-color: #27ae60; }
-    .medium { background-color: #f39c12; }
-    .hard { background-color: #e74c3c; }
+    .btn-diff small {
+        display: block;
+        font-weight: normal;
+        opacity: 0.8;
+    }
+
+    .easy {
+        background-color: #27ae60;
+    }
+
+    .medium {
+        background-color: #f39c12;
+    }
+
+    .hard {
+        background-color: #e74c3c;
+    }
 
     .board-memory {
         display: grid;

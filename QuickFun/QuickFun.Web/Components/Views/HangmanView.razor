@@ -1,4 +1,5 @@
 @using QuickFun.Games.Hangman
+@using QuickFun.Infrastructure.Services
 @namespace QuickFun.Web.Components.Views
 
 <div class="hangman-container">
@@ -30,7 +31,8 @@
 
         <div class="game-info">
             <span class="info-badge">Difficulty: <strong>@Engine.Difficulty</strong></span>
-            <span class="info-badge">Attempts: <strong>@(Engine.MaxAttempts - Engine.WrongAttempts) / @Engine.MaxAttempts</strong></span>
+            <span class="info-badge">Attempts: <strong>@(Engine.MaxAttempts - Engine.WrongAttempts) /
+                    @Engine.MaxAttempts</strong></span>
             <span class="info-badge state-badge">State: <strong>@Engine.GetCurrentStateName()</strong></span>
         </div>
 
@@ -51,9 +53,8 @@
             @foreach (var letter in letters)
             {
                 var l = letter;
-                <button class="btn-letter"
-                        @onclick="() => HandleGuess(l)"
-                        disabled="@(UsedLetters.Contains(l) || Engine.IsGameOver)">
+                <button class="btn-letter" @onclick="() => HandleGuess(l)"
+                    disabled="@(UsedLetters.Contains(l) || Engine.IsGameOver)">
                     @l
                 </button>
             }
@@ -73,8 +74,8 @@
     private HashSet<char> UsedLetters
     {
         get => Engine?.GuessedLetters != null
-            ? new HashSet<char>(Engine.GuessedLetters)
-            : new HashSet<char>();
+        ? new HashSet<char>(Engine.GuessedLetters)
+        : new HashSet<char>();
     }
 
     private async Task OnDifficultyChanged(ChangeEventArgs e)

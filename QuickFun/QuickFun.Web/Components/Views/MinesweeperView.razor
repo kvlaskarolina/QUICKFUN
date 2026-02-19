@@ -1,4 +1,5 @@
 @using QuickFun.Games.Minesweeper
+@using QuickFun.Infrastructure.Services
 @namespace QuickFun.Web.Components.Views
 @implements IDisposable
 
@@ -34,11 +35,10 @@
                     var cell = Engine.Board[row, col];
 
                     <div class="saper-cell
-                        @(cell.IsRevealed ? "revealed" : "hidden")
-                        @((cell.IsMine && cell.IsRevealed && !Engine.IsWin) ? "mine-loss" : "")
-                        @((cell.IsMine && cell.IsRevealed && Engine.IsWin) ? "mine-win" : "")"
-                        @onclick="() => Engine.HandleClick(row, col)"
-                        @oncontextmenu:preventDefault="true"
+                                        @(cell.IsRevealed ? "revealed" : "hidden")
+                                        @((cell.IsMine && cell.IsRevealed && !Engine.IsWin) ? "mine-loss" : "")
+                                        @((cell.IsMine && cell.IsRevealed && Engine.IsWin) ? "mine-win" : "")"
+                        @onclick="() => Engine.HandleClick(row, col)" @oncontextmenu:preventDefault="true"
                         @oncontextmenu="() => Engine.SwitchFlag(row, col)">
 
                         @if (cell.IsFlagged && !cell.IsRevealed)
@@ -101,7 +101,7 @@
         background-color: #e0e0e0;
         padding: 20px;
         border-radius: 8px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         user-select: none;
         max-width: fit-content;
         margin: 0 auto;
@@ -123,8 +123,14 @@
         transition: transform 0.3s ease;
     }
 
-    .win-text { color: #000000; transform: scale(1.1); }
-    .loss-text { color: #000000; }
+    .win-text {
+        color: #000000;
+        transform: scale(1.1);
+    }
+
+    .loss-text {
+        color: #000000;
+    }
 
     .stats-bar {
         display: flex;
@@ -137,9 +143,20 @@
         border: 2px inset #fff;
     }
 
-    .stat-item { display: flex; flex-direction: column; }
-    .stat-item .label { font-size: 0.7rem; color: #aaa; }
-    .stat-item .value { font-size: 1.2rem; font-weight: bold; }
+    .stat-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stat-item .label {
+        font-size: 0.7rem;
+        color: #aaa;
+    }
+
+    .stat-item .value {
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
 
     .saper-board {
         border: 4px inset #ffffff;
@@ -147,7 +164,9 @@
         padding: 2px;
     }
 
-    .saper-row { display: flex; }
+    .saper-row {
+        display: flex;
+    }
 
     .saper-cell {
         width: 35px;
@@ -182,12 +201,29 @@
         border: 1px solid #6c5ce7;
     }
 
-    .n-1 { color: #0984e3; }
-    .n-2 { color: #00b894; }
-    .n-3 { color: #d63031; }
-    .n-4 { color: #6c5ce7; }
-    .n-5 { color: #e17055; }
-    .n-6 { color: #00cec9; }
+    .n-1 {
+        color: #0984e3;
+    }
+
+    .n-2 {
+        color: #00b894;
+    }
+
+    .n-3 {
+        color: #d63031;
+    }
+
+    .n-4 {
+        color: #6c5ce7;
+    }
+
+    .n-5 {
+        color: #e17055;
+    }
+
+    .n-6 {
+        color: #00cec9;
+    }
 
     .btn-reset {
         padding: 10px 20px;
