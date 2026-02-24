@@ -29,7 +29,7 @@ public class MemoryEngine : BaseGameEngine
     public string Message { get; private set; } = "Choose difficulty";
     public bool IsGameOver { get; private set; } = false;
     private CancellationTokenSource? _startCts;
-
+    public event Action<int>? OnGameFinished; //potrzebne do api
     public MemoryEngine()
     {
         ResetState();
@@ -151,7 +151,12 @@ public class MemoryEngine : BaseGameEngine
         {
             _firstCard.IsMatched = true;
             _secondCard.IsMatched = true;
-            Score += 5;
+            if (_strategy != null) {
+                Score += _strategy.ScorePerRound;
+            }
+            else {
+                Score += 5;
+            }
             Message = "Pair found!";
         }
         else
@@ -176,6 +181,8 @@ public class MemoryEngine : BaseGameEngine
         {
             IsGameOver = true;
             Message = $"Huge Win!!! Your score is {Score}!";
+
+            OnGameFinished?.Invoke(Score);
         }
     }
 }

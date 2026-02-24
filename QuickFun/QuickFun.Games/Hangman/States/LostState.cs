@@ -11,7 +11,7 @@ namespace QuickFun.Games.Hangman.States
         }
 
         public string GetMessage(HangmanEngine context) {
-            return $"You lost! The word was: {context.WordToGuess}";
+            return $"You lost! The word was: {context.WordToGuess}. Your score is {context.Score}";
         }
     }
 }

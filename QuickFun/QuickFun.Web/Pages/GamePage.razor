@@ -93,19 +93,20 @@
         }
     }
 
-   private async Task Reset()
-  {
-      if (CurrentGame == null) return;
-      CurrentGame.Reset();
+    private async Task Reset()
+    {
+        if (CurrentGame == null) return;
 
-      if (CurrentGame is MemoryEngine memory)
-          await memory.Start(() => InvokeAsync(StateHasChanged));
+        CurrentGame.Reset();
 
-      if (CurrentGame is SudokuEngine sudoku)
-          await sudoku.Start(() => InvokeAsync(StateHasChanged));
+        if (CurrentGame is MemoryEngine memory)
+            await memory.Start(() => InvokeAsync(StateHasChanged));
 
-      StateHasChanged();
-  }
+        if (CurrentGame is SudokuEngine sudoku)
+            await sudoku.Start(() => InvokeAsync(StateHasChanged));
+
+        StateHasChanged();
+    }
 
     private void GoBack()
     {

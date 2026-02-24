@@ -12,6 +12,9 @@ namespace QuickFun.Games.Hangman.States
         {
             if (context.WordToGuess.Contains(letter))
             {
+                int occ = context.WordToGuess.Count(c => c == letter);
+                context.Score += occ * 5;
+
                 for (int i = 0; i < context.WordToGuess.Length; i++)
                 {
                     if (context.WordToGuess[i] == letter)
@@ -22,7 +25,9 @@ namespace QuickFun.Games.Hangman.States
 
                 if (!context.CurrentGuess.Contains('_'))
                 {
-                    context.Score = 1;
+                    int attemptsLeft = context.MaxAttempts - context.WrongAttempts;
+                    context.Score += (attemptsLeft * 5);
+                    
                     return new WonState();
                 }
 
@@ -34,7 +39,6 @@ namespace QuickFun.Games.Hangman.States
 
                 if (context.WrongAttempts >= context.MaxAttempts)
                 {
-                    context.Score = 0;
                     return new LostState();
                 }
 
