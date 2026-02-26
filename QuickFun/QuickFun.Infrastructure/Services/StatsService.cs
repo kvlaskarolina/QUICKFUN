@@ -43,4 +43,20 @@ public class StatsService
         }
         await _context.SaveChangesAsync();
     }
+
+    public async Task<List<LeaderboardDto>> GetTopScoresAsync(GameType gameType)
+    {
+        return await _context.UserGameStats.Where(s => s.GameType == gameType)
+            .OrderByDescending(s => s.BestScore)
+            .Take(5)
+            .Select(s => new LeaderboardDto(s.User!.UserName ?? "Unknown", s.BestScore, s.TotalScore))
+            .ToListAsync();
+    }
+
+    public async Task<List<UserStatDto>> GetUserStatsAsync(string userId)
+    {
+        return await _context.UserGameStats.Where(s => s.UserId == userId)
+            .Select(s => new UserStatDto(s.GameType.ToString(), s.BestScore, s.TotalScore, s.GamesPlayed))
+        .ToListAsync();
+    }
 }

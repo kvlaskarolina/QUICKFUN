@@ -4,7 +4,6 @@ namespace QuickFun.Domain.Enums
     {
         TicTacToeWithAI,
         TicTacToe,
-        Snake,
         Memory,
         Hangman,
         Sudoku,

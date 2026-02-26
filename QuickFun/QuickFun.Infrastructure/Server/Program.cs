@@ -94,6 +94,7 @@ app.MapPost("/api/account/register", async (CustomRegisterRequest request, UserM
     return Results.BadRequest(result.Errors.Select(e => e.Description));
 });
 
+//endpoint do logowania
 app.MapPost("api/account/login", async (CustomLoginRequest request, UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager) =>
 {
     var user = await userManager.FindByEmailAsync(request.Email);
@@ -127,5 +128,27 @@ app.MapGet("/api/account/me", async (ClaimsPrincipal user, UserManager<IdentityU
     return Results.Ok(new { username = dbUser.UserName });
 })
 .RequireAuthorization(); //sprawia że serwer sprawdzi ważność tokena
+
+
+//endpoint do leaderboard
+app.MapGet("/api/stats/leaderboard/{gameType}", async (GameType gameType, StatsService statsService) =>
+{
+    //korzystamy z funkcji zdefiniowanej w pliku StatsService.cs
+    var top = await statsService.GetTopScoresAsync(gameType);
+    return Results.Ok(top);
+});
+
+//endpoint do moich statystyk w sensie gracza aktualnie zalogowanego
+app.MapGet("/api/stats/my-stats", async (StatsService statsService, ClaimsPrincipal user) =>
+{
+    //pobieramy zalogowanego uzytkownika
+    var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+    if (userId == null) return Results.Unauthorized();
+
+    //i korzuystamy z funkcji zdefiniowanej w StatsService.cs
+    var myStats = await statsService.GetUserStatsAsync(userId);
+    return Results.Ok(myStats);
+}).RequireAuthorization();
+
 
 app.Run();

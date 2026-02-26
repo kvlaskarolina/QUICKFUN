@@ -30,6 +30,16 @@
     private string password = "";
     private string errorMessage = "";
 
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "returnUrl")]
+    public string? ReturnUrl { get; set; }
+
+    //metoda do debugowania
+    protected override void OnInitialized()
+    {
+        Console.WriteLine($"Wykryty ReturnUrl: {ReturnUrl}");
+    }
+
     private class AuthResponse
     {
         public string accessToken { get; set; } = "";
@@ -50,9 +60,14 @@
                 //dlatego chowamy token do local storage przelgadarki
                 //czat mowi ze "LocalStorage to taki mały dysk twardy wewnątrz Twojej przeglądarki."
                 await LocalStorage.SetItemAsync("authToken", result.accessToken);
+
+                // Jeśli wiemy skąd przyszedł użytkownik (ReturnUrl), odsyłamy go tam.
+                // W przeciwnym razie idziemy na stronę główną "/".
+                string destination = !string.IsNullOrEmpty(ReturnUrl) ? ReturnUrl : "/";
+                Console.WriteLine($"Przekierowuję do: {destination}");
                 
                 //przechodzimy do strony głownej po udanym zalogowaniu
-                Nav.NavigateTo("/", forceLoad: true);
+                Nav.NavigateTo(destination, forceLoad: true);
             }
         }
         else
