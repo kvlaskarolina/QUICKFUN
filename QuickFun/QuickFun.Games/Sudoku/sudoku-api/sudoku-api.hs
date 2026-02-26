@@ -100,11 +100,13 @@ main = scotty 3000 $ do
 
     let diff = parseDifficulty diffParam
     board <- liftIO $ generateSudoku diff
+    solved <- liftIO $ fillBoard board
 
     json $
       object
         [ "board" .= board,
-          "difficulty" .= diffParam
+          "difficulty" .= diffParam,
+          "solved" .= solved
         ]
 
   get "/api/health" $ do
