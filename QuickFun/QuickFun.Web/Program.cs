@@ -18,7 +18,7 @@ builder.Services.AddSingleton<IGameFactory, GameFactory>();
 builder.Services.AddScoped<IGameSessionService, LocalStorageGameSessionService>();
 
 
-builder.Services.AddScoped(sp => new HttpClient { 
+builder.Services.AddScoped(sp => new HttpClient {
     BaseAddress = new Uri("http://localhost:5253/")
 });
 

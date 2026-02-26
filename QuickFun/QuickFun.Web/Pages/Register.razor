@@ -1,0 +1,110 @@
+@page "/register"
+@inject HttpClient Http
+@inject NavigationManager Nav
+
+<div class="auth-container">
+    <h2>Create Account</h2>
+
+    <div class="input-group">
+        <label>Email</label>
+        <input @bind="email" type="email" placeholder="Enter your email" />
+    </div>
+
+    <div class="input-group">
+        <label>Login (Username)</label>
+        <input @bind="username" type="text" placeholder="Enter username" />
+    </div>
+
+    <div class="input-group">
+        <label>Password</label>
+        <input @bind="password" type="password" placeholder="Enter password" />
+    </div>
+
+    <button class="btn-submit" @onclick="HandleRegister">Sign up</button>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <p class="error-msg">@errorMessage</p>
+    }
+    @if (isSuccess)
+    {
+        <div class="success-msg">
+            Account created successfully! <br />
+            <a href="/login">Click here to log in.</a>
+        </div>
+    }
+</div>
+
+@code
+{
+    private string email = "";
+    private string username = "";
+    private string password = "";
+    private string errorMessage = "";
+    private bool isSuccess = false;
+
+    private async Task HandleRegister()
+    {
+        errorMessage = "";
+        isSuccess = false;
+
+        // Walidacja na froncie
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(username))
+        {
+            errorMessage = "Please fill in all fields!";
+            return;
+        }
+
+        // Nowa paczka danych
+        var registerData = new
+        {
+            Email = email,
+            Username = username,
+            Password = password
+        };
+
+        try
+        {
+            // Wysyłamy paczkę pod nowy endpoint
+            var response = await Http.PostAsJsonAsync("api/account/register", registerData);
+
+            if (response.IsSuccessStatusCode)
+            {
+                isSuccess = true;
+                email = "";
+                username = "";
+                password = "";
+            }
+            else
+            {
+                // Próbujemy odczytać błędy z serwera
+                var errors = await response.Content.ReadFromJsonAsync<IEnumerable<string>>();
+                
+                if (errors != null && errors.Any())
+                {
+                    // Identity API zazwyczaj zwraca błędy po angielsku domyślnie, więc tu wystarczy join
+                    errorMessage = string.Join(", ", errors);
+                }
+                else
+                {
+                    errorMessage = "Registration failed.";
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Connection error: {ex.Message}";
+        }
+    }
+}
+
+<style>
+    .auth-container { max-width: 400px; margin: 50px auto; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); background: white; text-align: center; }
+    .input-group { margin-bottom: 20px; text-align: left; }
+    .input-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+    .input-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+    .btn-submit { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
+    .btn-submit:hover { background: #218838; }
+    .error-msg { color: red; margin-top: 15px; }
+    .success-msg { color: green; margin-top: 15px; font-weight: bold; }
+</style>

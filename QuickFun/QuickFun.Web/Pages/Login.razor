@@ -1,0 +1,85 @@
+@page "/login"
+@inject HttpClient Http
+@inject NavigationManager Nav
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+
+<div class="auth-container">
+    <h2>Log in</h2>
+
+    <div class="input-group">
+        <label>Email</label>
+        <input @bind="email" type="email" placeholder="Enter your email"/>
+    </div>
+
+    <div class="input-group">
+        <label>Password</label>
+        <input @bind="password" type="password" placeholder="Enter your password"/>
+    </div>
+
+    <button class="btn-submit" @onclick="HandleLogin">Log in</button>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <p class="error-msg">@errorMessage</p>
+    }
+</div>
+
+@code
+{
+    private string email = "";
+    private string password = "";
+    private string errorMessage = "";
+
+    private class AuthResponse
+    {
+        public string accessToken { get; set; } = "";
+    }
+
+    private async Task HandleLogin()
+    {
+        //wysylamy zapytanie json do endpointu /api/accountlogin ktory sami zrobilismy
+        var response = await Http.PostAsJsonAsync("/api/account/login", new { email = email, password = password });
+        if (response.IsSuccessStatusCode)
+        {
+            //dostajemy od serwera w odpowiedzi obiekt ktory w srodku ma specjalny access token
+            var result = await response.Content.ReadFromJsonAsync<AuthResponse>();
+            
+            if (result != null && !string.IsNullOrEmpty(result.accessToken))
+            {
+                //narazie token jest w pamieci ram, ale ram sie kasuje za kazdym odswiezeniem strony
+                //dlatego chowamy token do local storage przelgadarki
+                //czat mowi ze "LocalStorage to taki mały dysk twardy wewnątrz Twojej przeglądarki."
+                await LocalStorage.SetItemAsync("authToken", result.accessToken);
+                
+                //przechodzimy do strony głownej po udanym zalogowaniu
+                Nav.NavigateTo("/", forceLoad: true);
+            }
+        }
+        else
+        {
+            // Czytamy co dokładnie odpowiedział serwer
+            var errorContent = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"BŁĄD LOGOWANIA ({response.StatusCode}): {errorContent}");
+            
+            errorMessage = response.StatusCode switch
+        {
+            System.Net.HttpStatusCode.Unauthorized => "Invalid email or password. Please try again.",
+            System.Net.HttpStatusCode.BadRequest => "The login request was invalid.",
+            System.Net.HttpStatusCode.InternalServerError => "Server error. Please try again later.",
+            _ => "An unexpected error occurred. Please check your connection."
+        };
+
+        }
+        }
+}
+
+<style>
+    /* Te same style co w Register.razor */
+    .auth-container { max-width: 400px; margin: 50px auto; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); background: white; text-align: center; }
+    .input-group { margin-bottom: 20px; text-align: left; }
+    .input-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+    .input-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+    .btn-submit { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
+    .btn-submit:hover { background: #0056b3; }
+    .error-msg { color: red; margin-top: 15px; }
+</style>

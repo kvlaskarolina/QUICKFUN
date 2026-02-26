@@ -48,7 +48,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-//szalona opcja, jedna linijka która tworzy potrzebne do logowania endpointy
+//szalona opcja, jedna linijka która tworzy potrzebne do logowania endpointy  (jak sie okazuje po czasie nie sa takie super wrrrrr)
 app.MapIdentityApi<IdentityUser>();
 
 //endpoint do zapisywania wynikow w bazie
@@ -69,13 +69,63 @@ app.MapPost("/api/stats/save", async (GameResultRequest request, StatsService st
         return Results.Unauthorized();
     }
 
-    //var userId = "9976e510-0e1b-46b2-a70d-6770a03442ee"; do testowania
-
     await statsService.UpdateStatsAsync(userId, request.Score, request.GameType);
 
     return Results.Ok(new { message = "Score saved"});
 }
 ).RequireAuthorization();
 
+
+app.MapPost("/api/account/register", async (CustomRegisterRequest request, UserManager<IdentityUser> userManager) =>
+{
+    var user = new IdentityUser
+    {
+        UserName = request.Username,
+        Email = request.Email,
+        EmailConfirmed = true
+    };
+
+    var result = await userManager.CreateAsync(user, request.Password);
+
+    if (result.Succeeded)
+    {
+        return Results.Ok(new { message = "Konto z loginem założone!" });
+    }
+    return Results.BadRequest(result.Errors.Select(e => e.Description));
+});
+
+app.MapPost("api/account/login", async (CustomLoginRequest request, UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager) =>
+{
+    var user = await userManager.FindByEmailAsync(request.Email);
+
+    if (user == null) return Results.Unauthorized();
+
+    var result = await signInManager.CheckPasswordSignInAsync(user, request.Password, false);
+
+    if (result.Succeeded)
+    {
+        //tworzymy token dla uzytkownika
+        var claimsPrincipal = await signInManager.CreateUserPrincipalAsync(user);
+
+        //to wygeneruje taki sam json z accessTokenem, jak w orygialnym API od microsoftu
+        return Results.SignIn(claimsPrincipal, authenticationScheme: IdentityConstants.BearerScheme);
+    }
+
+    return Results.Unauthorized();
+});
+
+//to jest endpoint ktory pozwala frontendowi zapytac o dane aktualnie zalogowanego gracza
+app.MapGet("/api/account/me", async (ClaimsPrincipal user, UserManager<IdentityUser> userManager) =>
+{
+    //serwer rozpakuje token i sam wyciągnie ID użytkownika
+    var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+    if (userId == null) return Results.Unauthorized();
+
+    var dbUser = await userManager.FindByIdAsync(userId);
+    if (dbUser == null) return Results.NotFound();
+
+    return Results.Ok(new { username = dbUser.UserName });
+})
+.RequireAuthorization(); //sprawia że serwer sprawdzi ważność tokena
 
 app.Run();

@@ -2,6 +2,7 @@ using Blazored.LocalStorage;
 using QuickFun.Application.Interfaces;
 using QuickFun.Domain.Entities;
 using System.Net.Http.Json;
+using System.Net.Http.Headers;
 
 namespace QuickFun.Infrastructure.Services;
 
@@ -33,6 +34,21 @@ public class LocalStorageGameSessionService : IGameSessionService
 
         try
         {
+            //wyciagamy token z local storage przegladarki
+            var token = await _localStorage.GetItemAsync<string>("authToken");
+
+            if (!string.IsNullOrEmpty(token))
+            {
+                // przyklejamy token do nagłówka zapytania HTTP
+                _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
+            else
+            {
+                //jezeli sie nie udalo wyciagnac tokena to nie jestesmy zalogowani
+                Console.WriteLine("Ostrzeżenie: Brak tokena. Użytkownik chyba nie jest zalogowany!");
+            }
+
+
             var response = await _http.PostAsJsonAsync("api/stats/save", request); //wysylamy jsona pod wskazany adres
 
             if (response.IsSuccessStatusCode) //messages ktore mozna zobaczyc w konsoli na przegladarce w trakcie testowania np
