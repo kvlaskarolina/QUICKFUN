@@ -1,0 +1,6 @@
+@QuickFun.Server_HostAddress = http://localhost:5253
+
+GET {{QuickFun.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

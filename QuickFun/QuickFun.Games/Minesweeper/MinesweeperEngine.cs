@@ -38,6 +38,8 @@ public class MinesweeperEngine : BaseGameEngine
     private readonly int _minesCount = 20;
     private bool _isFirstMove = true;
 
+    public event Action<int>? OnGameFinished;
+
     public MinesweeperEngine(IMinesweeperFloodingStrategy strategy)
     {
         _strategy = strategy;
@@ -178,6 +180,8 @@ public class MinesweeperEngine : BaseGameEngine
         {
             Message = "take the L";
         }
+        
+        OnGameFinished?.Invoke(Score);
 
         if (outcome)
         {
@@ -209,16 +213,27 @@ public class MinesweeperEngine : BaseGameEngine
 
     private void CalculateScore()
     {
-        int revealed = 0;
+        int total = 0;
         for (int r = 0; r < _rows; r++)
         {
             for (int c = 0; c < _cols; c++)
             {
-                if (Board[r, c].IsRevealed && !Board[r, c].IsMine) revealed++;
+                if (Board[r, c].IsRevealed && !Board[r, c].IsMine)
+                {
+                    int cellValue = Board[r, c].AdjMines switch
+                    {
+                        0 => 0,
+                        1 or 2 => 2,
+                        3 or 4 => 4,
+                        _ => 10
+                    };
+                    total += cellValue;
+                }
+                
             }
         }
 
-        Score = revealed;
+        Score = total;
     }
 
 }

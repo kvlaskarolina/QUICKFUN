@@ -9,11 +9,15 @@ public class SudokuEngine : BaseGameEngine
 {
     private readonly HttpClient _httpClient;
     public override string Name => "Sudoku";
+    public string Result { get; private set; }
     public override GameType Type => GameType.Sudoku;
-    public int Score => 0;
+    public string Difficulty { get; private set; }
+    public int Score { get; private set; }
     public int[][]? Board { get; private set; }
+    public int[][]? Solution { get; private set; }
     public bool[][]? IsOriginal { get; private set; }
     public bool IsLoading { get; private set; }
+    public event Action<int>? OnGameFinished;
 
     public SudokuEngine(HttpClient httpClient)
     {
@@ -33,6 +37,11 @@ public class SudokuEngine : BaseGameEngine
             if (response?.Board != null)
             {
                 Board = response.Board;
+                Solution = response.Solution;
+                Result = string.Empty;
+                Difficulty = response.Difficulty;
+                Score = 0;
+                IsGameOver = false;
                 IsOriginal = new bool[9][];
                 for (int r = 0; r < 9; r++)
                 {
@@ -52,11 +61,38 @@ public class SudokuEngine : BaseGameEngine
 
     public void UpdateCell(int row, int col, int value)
     {
-        if (Board != null && IsOriginal != null && !IsOriginal[row][col])
+        if (Board != null && IsOriginal != null && row < 9 && col < 9)
         {
-            if (value >= 0 && value <= 9)
+            if (!IsOriginal[row][col])
+            {
                 Board[row][col] = value;
+            }
         }
+    }
+
+    public void CheckWin()
+    {
+        if (Board == null || Solution == null) Result = "take the L";
+        for (int r = 0; r < 9; r++)
+            for (int c = 0; c < 9; c++)
+                if (Board[r][c] != Solution[r][c])
+                {
+                    Result = "take the L";
+                    Score = 0;
+                    OnGameFinished?.Invoke(Score);
+                    return;
+                }
+        Result = "Kudos goon job";
+        Score = Difficulty.ToLower() switch
+        {
+            "easy" => 100,
+            "medium" => 200,
+            "hard" => 300,
+            _ => 30
+        };
+        OnGameFinished?.Invoke(Score);
+        return;
+
     }
 
     public void Reset() => Board = null;

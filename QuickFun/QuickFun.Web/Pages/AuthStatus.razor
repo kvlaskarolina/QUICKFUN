@@ -1,0 +1,104 @@
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@inject HttpClient Http
+@using System.Net.Http.Headers
+@inject NavigationManager Nav
+
+<div class="auth-status">
+    @if (isLoggedIn)
+    {
+        <button class="nav-btn logout" @onclick="HandleLogout">Log out</button>
+    }
+    else
+    {
+        <a class="nav-link-auth" href="/login">Log in</a>
+        <a class="nav-link-auth sign-up" href="/register">Sign up</a>
+    }
+</div>
+
+@code {
+    private bool isLoggedIn = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var token = await LocalStorage.GetItemAsync<string>("authToken");
+        
+        if (string.IsNullOrEmpty(token))
+        {
+            isLoggedIn = false;
+        }
+        else
+        {
+            try
+            {
+                var request = new HttpRequestMessage(HttpMethod.Get, "api/account/me");
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var response = await Http.SendAsync(request);
+
+                isLoggedIn = response.IsSuccessStatusCode;
+
+                if (!isLoggedIn)
+                {
+                    await LocalStorage.RemoveItemAsync("authToken");
+                }
+            }
+            catch
+            {
+                isLoggedIn = false;
+            }
+        }
+    }
+
+    private async Task HandleLogout()
+    {
+        await LocalStorage.RemoveItemAsync("authToken");
+        // forceLoad: true odświeża całą aplikację, co zresetuje stan wszystkich komponentów
+        Nav.NavigateTo("/", forceLoad: true);
+    }
+}
+
+<style>
+    .auth-status {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .nav-link-auth {
+        color: #0086fc;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+
+    .nav-link-auth:hover {
+        text-decoration: underline;
+    }
+
+    .sign-up {
+        background-color: #28a745;
+        color: white !important;
+        padding: 6px 12px;
+        border-radius: 4px;
+    }
+
+    .sign-up:hover {
+        background-color: #218838;
+        text-decoration: none !important;
+    }
+
+    .logout {
+        background: none;
+        border: 1px solid #dc3545;
+        color: #dc3545;
+        padding: 5px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: 0.2s;
+    }
+
+    .logout:hover {
+        background-color: #dc3545;
+        color: white;
+    }
+</style>

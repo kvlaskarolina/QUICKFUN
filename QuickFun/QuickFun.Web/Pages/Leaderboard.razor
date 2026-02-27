@@ -1,0 +1,150 @@
+@page "/leaderboard"
+@using QuickFun.Domain.Enums
+@using System.Net.Http.Headers
+@using QuickFun.Domain.Entities
+@inject HttpClient Http
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+
+<div class="stats-container">
+    <h2>Hall of Fame</h2>
+
+    <div class="tabs">
+    @*automatycznie tworzy przycisk dla kazdej gry z Enuma*@
+        @foreach (GameType type in Enum.GetValues(typeof(GameType)))
+        {
+            <button class="tab-btn @(selectedGame == type ? "active" : "")"
+                    @onclick="() => ChangeGame(type)">
+                @type
+            </button>
+        }
+    </div>
+
+    <div class="grid-stats">
+        <section class="stat-section">
+            <h3>Global Top 5</h3>
+            @if (topScores == null) { <p>Loading...</p> }
+            else {
+                <table class="table">
+                    <thead><tr><th>Player</th><th>Best Score</th></tr></thead>
+                    <tbody>
+                        @foreach (var entry in topScores) {
+                            <tr><td>@entry.Username</td><td>@entry.Score</td></tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </section>
+
+        <section class="stat-section my-stats">
+    <h3>My Stats (@selectedGame)</h3>
+
+    @if (!isLoggedIn)
+    {
+        @* gostek jest gosciem*@
+        <div class="auth-prompt">
+            <p>You are not logged in.</p>
+            <a href="/login?returnUrl=/leaderboard" class="btn-link">Log in to track your scores!</a>
+        </div>
+    }
+    else if (myCurrentGameStat == null)
+    {
+        @*zalogowany ale nie gral jeszcze w ta gre *@
+        <div class="no-data-prompt">
+            <p>You haven't played <strong>@selectedGame</strong> yet.</p>
+            <p>Go to the home page and play a session to see your rank here!</p>
+        </div>
+    }
+    else
+    {
+        @*zalogowany i ma już jakieś punkty w tej grze*@
+        <div class="my-score-card">
+            <p>Best: <strong>@myCurrentGameStat.BestScore</strong></p>
+            <p>Total: @myCurrentGameStat.TotalScore</p>
+            <p>Games played: @myCurrentGameStat.GamesPlayed</p>
+        </div>
+    }
+</section>
+    </div>
+</div>
+
+@code {
+    private GameType selectedGame = GameType.Minesweeper;
+    private List<LeaderboardDto>? topScores;
+    private UserStatDto? myCurrentGameStat;
+    private bool isLoggedIn = false;
+    protected override async Task OnInitializedAsync() => await RefreshData();
+
+    private async Task ChangeGame(GameType type) {
+        selectedGame = type;
+        await RefreshData();
+    }
+
+    private async Task RefreshData() {
+        // Zawsze czyścimy stare statystyki przed pobraniem nowych, 
+        // żeby nie pokazywać przez sekundę wyniku z poprzedniej gry
+        myCurrentGameStat = null;
+
+        // 1. Pobierz Global Top 5 (Dostępne dla każdego)
+        topScores = await Http.GetFromJsonAsync<List<LeaderboardDto>>($"api/stats/leaderboard/{selectedGame}");
+
+        // 2. Obsługa logowania i statystyk prywatnych
+        var token = await LocalStorage.GetItemAsync<string>("authToken");
+        isLoggedIn = !string.IsNullOrEmpty(token);
+
+        if (isLoggedIn) {
+            try {
+                var request = new HttpRequestMessage(HttpMethod.Get, "api/stats/my-stats");
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                
+                var response = await Http.SendAsync(request);
+                
+                if (response.IsSuccessStatusCode) {
+                    var allMyStats = await response.Content.ReadFromJsonAsync<List<UserStatDto>>();
+                    // Szukamy rekordu dla obecnie wybranej gry
+                    myCurrentGameStat = allMyStats?.FirstOrDefault(x => x.GameName == selectedGame.ToString());
+                }
+                else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized) {
+                    // Token wygasł w trakcie przeglądania
+                    isLoggedIn = false;
+                    await LocalStorage.RemoveItemAsync("authToken");
+                }
+            }
+            catch {
+                isLoggedIn = false;
+            }
+        }
+    }
+}
+
+<style>
+    .stats-container { max-width: 800px; margin: 20px auto; color: #333; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 10px; }
+    .tab-btn { padding: 8px 16px; border: none; border-radius: 20px; cursor: pointer; background: #eee; }
+    .tab-btn.active { background: #007bff; color: white; }
+    .grid-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+    .stat-section { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    .table { width: 100%; border-collapse: collapse; }
+    .table th, .table td { text-align: left; padding: 10px; border-bottom: 1px solid #eee; }
+    .my-score-card { background: #f0f7ff; padding: 15px; border-radius: 8px; border-left: 4px solid #007bff; }
+    .no-data-prompt {
+        background-color: #fffaf0;
+        border-left: 4px solid #f6ad55;
+        padding: 15px;
+        border-radius: 8px;
+        color: #7b341e;
+    }
+
+    .auth-prompt {
+        background-color: #f7fafc;
+        border: 1px dashed #cbd5e0;
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+    }
+
+    .btn-link {
+        color: #007bff;
+        text-decoration: underline;
+        font-weight: bold;
+    }
+</style>

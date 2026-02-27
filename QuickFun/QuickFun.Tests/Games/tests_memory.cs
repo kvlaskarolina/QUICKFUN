@@ -17,6 +17,7 @@ namespace QuickFun.Tests
             public int Rows => 2;
             public int Columns => 2;
             public int DelayMs => 0;
+            public int ScorePerRound => 5;
         }
 
         [Fact]

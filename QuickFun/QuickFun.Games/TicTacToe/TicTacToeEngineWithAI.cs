@@ -9,15 +9,19 @@ namespace QuickFun.Games.Engines.TicTacToe.AI
     {
         private ITicTacToeDifficultyStrategy _aiStrategy;
         private readonly CommandHistory _history = new CommandHistory();
+        public event Action<int>? OnGameFinished;
 
+        public override GameType Type => GameType.TicTacToeWithAI; 
         public TicTacToeEngineWithAI(ITicTacToeDifficultyStrategy strategy)
         {
             _aiStrategy = strategy;
+            Score = 20;
         }
 
         public TicTacToeEngineWithAI()
         {
             _aiStrategy = new TicTacToeMediumStrategy();
+            Score = 20;
         }
 
         public new void Reset()
@@ -25,6 +29,9 @@ namespace QuickFun.Games.Engines.TicTacToe.AI
             base.Reset();
             _history.Clear();
             if (_aiStrategy == null) _aiStrategy = new TicTacToeMediumStrategy();
+            Score = 20;
+            IsGameOver = false;
+            Message = "Your turn! (X)";
         }
 
         public void ResetGame() => Reset();
@@ -38,6 +45,7 @@ namespace QuickFun.Games.Engines.TicTacToe.AI
 
             CurrentPlayer = 'X';
             Message = "Undo performed.";
+            Score -= 5;
         }
 
         public void SetDifficulty(Level level)
@@ -58,10 +66,23 @@ namespace QuickFun.Games.Engines.TicTacToe.AI
 
             // Ruch Gracza przez Command
             var playerCmd = new MoveCommand(Board, index, CurrentPlayer, () => { });
+            Score -= 1;
             _history.ExecuteCommand(playerCmd);
 
-            if (CheckWinner()) { Message = "You WON!"; IsGameOver = true; Score = 1; return; }
-            if (IsBoardFull()) { Message = "DRAW!"; IsGameOver = true; Score = 0; return; }
+            if (CheckWinner())
+            {
+                Message = "You WON!";
+                IsGameOver = true;
+                OnGameFinished?.Invoke(Score);
+                return;
+            }
+            if (IsBoardFull()) {
+                Message = "DRAW!";
+                IsGameOver = true;
+                Score = 0;
+                OnGameFinished?.Invoke(Score);
+                return;
+            }
 
             CurrentPlayer = 'O';
             await Task.Delay(500);
@@ -72,8 +93,20 @@ namespace QuickFun.Games.Engines.TicTacToe.AI
                 var aiCmd = new MoveCommand(Board, aiMove, CurrentPlayer, () => { });
                 _history.ExecuteCommand(aiCmd);
 
-                if (CheckWinner()) { Message = "TAKE THE L LOOSER!"; IsGameOver = true; Score = -1; return; }
-                if (IsBoardFull()) { Message = "DRAW!"; IsGameOver = true; Score = 0; return; }
+                if (CheckWinner()) {
+                    Message = "TAKE THE L LOSER!";
+                    IsGameOver = true;
+                    Score -= 30;
+                    OnGameFinished?.Invoke(Score);
+                    return;
+                }
+                if (IsBoardFull()) {
+                    Message = "DRAW!";
+                    IsGameOver = true;
+                    Score = 0;
+                    OnGameFinished?.Invoke(Score);
+                    return;
+                }
 
                 CurrentPlayer = 'X';
             }

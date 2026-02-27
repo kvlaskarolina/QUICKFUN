@@ -39,6 +39,8 @@ namespace QuickFun.Games.Hangman
 
         private readonly IWordProvider _wordProvider;
 
+        public event Action<int>? OnGameFinished; //do api
+
         public HangmanEngine(IWordProvider wordProvider, HangmanDifficulty difficulty)
         {
             _wordProvider = wordProvider;
@@ -75,6 +77,11 @@ namespace QuickFun.Games.Hangman
             _guessedLetters.Add(letter);
 
             CurrentState = CurrentState.HandleMove(this, letter);
+
+            if (CurrentState.IsGameOver)
+            {
+                OnGameFinished?.Invoke(Score);
+            }
         }
 
         public string HangmanPicture => HangmanPictures.GetPicture(Difficulty, WrongAttempts);

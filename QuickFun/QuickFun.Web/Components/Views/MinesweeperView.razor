@@ -1,4 +1,7 @@
 @using QuickFun.Games.Minesweeper
+@using QuickFun.Application.Interfaces
+@using QuickFun.Domain.Entities
+@inject IGameSessionService SessionService
 @namespace QuickFun.Web.Components.Views
 @implements IDisposable
 
@@ -76,9 +79,13 @@
 @code {
     [Parameter] public MinesweeperEngine Engine { get; set; } = default!;
 
-    protected override void OnInitialized()
+    protected override void OnParametersSet()
     {
+        Engine.OnStateChanged -= HandleStateChanged;
+        Engine.OnGameFinished -= HandleSaveScore;
+
         Engine.OnStateChanged += HandleStateChanged;
+        Engine.OnGameFinished += HandleSaveScore;
     }
 
     private void HandleStateChanged()
@@ -87,6 +94,17 @@
         InvokeAsync(StateHasChanged);
     }
 
+    private async void HandleSaveScore(int finalScore)
+    {
+        var result = new GameResult
+        {
+            Type = Engine.Type,
+            Score = finalScore
+        };
+
+        await SessionService.AddGameResultAsync(result);
+        await InvokeAsync(StateHasChanged);
+    }
     public void Dispose()
     {
         Engine.OnStateChanged -= HandleStateChanged;

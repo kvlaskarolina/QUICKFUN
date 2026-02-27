@@ -26,6 +26,8 @@
 
     <p class="status-message">@Engine.Message</p>
 
+    <h3>Score: @Engine.Score</h3>
+
 
     <div class="board">
         @for (int i = 0; i < 9; i++)
@@ -46,6 +48,23 @@
     [Parameter]
     public TicTacToeEngineWithAI Engine { get; set; }
     private Level selectedLevel = Level.Medium;
+
+    protected override void OnParametersSet()
+    {
+        Engine.OnGameFinished -= HandleSaveScore;
+        Engine.OnGameFinished += HandleSaveScore;
+    }
+
+    private async void HandleSaveScore(int finalScore)
+    {
+        var result = new GameResult
+        {
+            Type = Engine.Type,
+            Score = finalScore
+        };
+        await SessionService.AddGameResultAsync(result);
+        await InvokeAsync(StateHasChanged);
+    }
     private void UndoMove()
     {
         Engine.Undo();
@@ -61,6 +80,11 @@
     private void ResetGame()
     {
         Engine.ResetGame();
+    }
+
+    public void Dispose()
+    {
+        if (Engine != null) Engine.OnGameFinished -= HandleSaveScore;
     }
 }
 <style>

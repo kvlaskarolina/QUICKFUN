@@ -72,20 +72,24 @@ private async Task SelectDifficulty(IMemoryDifficultyStrategy strategy)
 protected override void OnInitialized()
 {
     // Nie odpalamy Engine.Start() tutaj, bo czekamy na wybór poziomu
+    Engine.OnGameFinished += HandleSaveScore;
+}
+
+private async void HandleSaveScore(int finalScore){
+
+    var result = new GameResult
+        {
+            Type = Engine.Type,
+            Score = finalScore
+        };
+
+    await SessionService.AddGameResultAsync(result); //serwis wysyla to do api
+    await InvokeAsync(StateHasChanged);
 }
 
 private async Task OnCardClick(MemoryCard card)
 {
     await Engine.HandleCardClick(card);
-
-    if (Engine.IsGameOver)
-    {
-        await SessionService.AddGameResultAsync(new GameResult
-        {
-            Type = Engine.Type,
-            Score = Engine.Score
-        });
-    }
 }
 }
 

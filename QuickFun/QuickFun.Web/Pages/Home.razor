@@ -1,10 +1,53 @@
 ﻿@page "/"
 @using QuickFun.Web.Layout.ProductSliderComponent
+@using System.Net.Http.Headers
+@inject HttpClient Http
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
-
-try our amazing games
+@if (!string.IsNullOrEmpty(nickname))
+{
+    <h1>Hello, @nickname!</h1>
+    <p>Great to see you again. Ready to break some records?</p>
+}
+else
+{
+    <h1>Hello, world!</h1>
+    <p>Try our amazing games. <a href="/login">Log in</a> to save your scores!</p>
+}
 
 <ProductSlider />
+
+@code
+{
+    private string? nickname;
+
+    protected override async Task OnInitializedAsync(){
+        //czy w "schowku" jest token
+        var token = await LocalStorage.GetItemAsync<string>("authToken");
+
+        if (!string.IsNullOrEmpty(token))
+        {
+            try
+            {
+                //tworzymy zapytanie i dodajemy token do niego
+                var request = new HttpRequestMessage(HttpMethod.Get, "api/account/me");
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                
+                var response = await Http.SendAsync(request);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var info = await response.Content.ReadFromJsonAsync<UserInfo>();
+                    nickname = info?.Username;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Nie udało się pobrać profilu: {ex.Message}");
+            }
+        }
+    }
+    private class UserInfo { public string Username { get; set; } = ""; }
+}

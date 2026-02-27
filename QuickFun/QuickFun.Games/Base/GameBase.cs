@@ -7,7 +7,6 @@ namespace QuickFun.Games.Base
     {
         public abstract GameType Type { get; }
         public abstract string Name { get; }
-
         public int Score { get; protected set; } = 0;
         public bool IsGameOver { get; protected set; } = false;
         public string Message { get; protected set; } = string.Empty;

@@ -1,5 +1,10 @@
 @using QuickFun.Games.Hangman
+@using QuickFun.Domain.Enums
+@using QuickFun.Application.Interfaces
+@using QuickFun.Domain.Entities
+
 @namespace QuickFun.Web.Components.Views
+@inject IGameSessionService SessionService
 
 <div class="hangman-container">
     @if (Engine == null)
@@ -32,6 +37,7 @@
             <span class="info-badge">Difficulty: <strong>@Engine.Difficulty</strong></span>
             <span class="info-badge">Attempts: <strong>@(Engine.MaxAttempts - Engine.WrongAttempts) / @Engine.MaxAttempts</strong></span>
             <span class="info-badge state-badge">State: <strong>@Engine.GetCurrentStateName()</strong></span>
+            <span class="info-badge">Score: <strong>@Engine.Score</strong></span>
         </div>
 
         <div class="hangman-box">
@@ -76,7 +82,14 @@
             ? new HashSet<char>(Engine.GuessedLetters)
             : new HashSet<char>();
     }
-
+    protected override void OnParametersSet()
+    {
+        if (Engine != null)
+        {
+            Engine.OnGameFinished -= HandleSaveScore;
+            Engine.OnGameFinished += HandleSaveScore;
+        }
+    }
     private async Task OnDifficultyChanged(ChangeEventArgs e)
     {
         if (Enum.TryParse<HangmanDifficulty>(e.Value?.ToString(), out var difficulty))
@@ -92,6 +105,20 @@
         StateHasChanged();
     }
 
+    private async void HandleSaveScore(int finalScore)
+    {
+        if (Engine == null) return;
+
+        var result = new GameResult
+            {
+                Type = Engine.Type,
+                Score = finalScore
+            };
+
+        await SessionService.AddGameResultAsync(result); //serwis wysyla to do api
+        await InvokeAsync(StateHasChanged);
+    }
+
     private void HandleGuess(char letter)
     {
         if (Engine == null || Engine.IsGameOver) return;
@@ -99,6 +126,14 @@
         Engine.MakeMove(letter);
 
         StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        if (Engine != null)
+        {
+            Engine.OnGameFinished -= HandleSaveScore;
+        }
     }
 }
 
