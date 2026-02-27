@@ -73,14 +73,16 @@ reduceBoard b (idx : idxs) n = do
     then reduceBoard tempBoard idxs (n - 1)
     else reduceBoard b idxs n
 
-data Difficulty = Easy | Medium | Hard
+data Difficulty = Easy | Medium | Hard | Test
 
 difficultyToCells :: Difficulty -> Int
+difficultyToCells Test = 1
 difficultyToCells Easy = 30
 difficultyToCells Medium = 45
 difficultyToCells Hard = 55
 
 parseDifficulty :: String -> Difficulty
+parseDifficulty "test" = Test
 parseDifficulty "easy" = Easy
 parseDifficulty "medium" = Medium
 parseDifficulty "hard" = Hard
@@ -106,7 +108,7 @@ main = scotty 3000 $ do
       object
         [ "board" .= board,
           "difficulty" .= diffParam,
-          "solved" .= solved
+          "solution" .= solved
         ]
 
   get "/api/health" $ do

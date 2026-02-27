@@ -39,7 +39,7 @@
                             else
                             {
                                 <input type="number" min="1" max="9"
-                                    value="@(Engine.Board[row][col] == 0 ? "" : Engine.Board[row][col])"
+                                    value="@(Engine.Board?[row][col] == 0 ? "" : Engine.Board?[row][col].ToString())"
                                     @oninput="@((e) => HandleInput(row, col, e))" />
                             }
                         </td>
@@ -47,7 +47,12 @@
                 </tr>
             }
         </table>
-        <button class="btn btn-secondary mt-3" @onclick="() => Engine.Reset()">Zmień trudność</button>
+        <button class="btn btn-secondary mt-3" @onclick="() => Engine.Reset()">Change difficulty</button>
+        <button class="btn btn-primary mt-3 ml-2" @onclick="() => Engine.CheckWin()">Check</button>
+        <h3>@Engine.Result</h3>
+        <h3>Score: @Engine.Score</h3>
+
+
     }
 </div>
 
@@ -99,7 +104,7 @@
         -webkit-appearance: none;
     }
 
-       .btn-diff {
+    .btn-diff {
         padding: 15px;
         border: none;
         border-radius: 8px;
@@ -125,7 +130,6 @@
     .hard {
         background-color: #e74c3c;
     }
-
 </style>
 
 @code {
