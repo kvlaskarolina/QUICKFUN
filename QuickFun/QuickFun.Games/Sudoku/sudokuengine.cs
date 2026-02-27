@@ -17,6 +17,7 @@ public class SudokuEngine : BaseGameEngine
     public int[][]? Solution { get; private set; }
     public bool[][]? IsOriginal { get; private set; }
     public bool IsLoading { get; private set; }
+    public event Action<int>? OnGameFinished;
 
     public SudokuEngine(HttpClient httpClient)
     {
@@ -40,6 +41,7 @@ public class SudokuEngine : BaseGameEngine
                 Result = string.Empty;
                 Difficulty = response.Difficulty;
                 Score = 0;
+                IsGameOver = false;
                 IsOriginal = new bool[9][];
                 for (int r = 0; r < 9; r++)
                 {
@@ -77,6 +79,7 @@ public class SudokuEngine : BaseGameEngine
                 {
                     Result = "take the L";
                     Score = 0;
+                    OnGameFinished?.Invoke(Score);
                     return;
                 }
         Result = "Kudos goon job";
@@ -87,6 +90,8 @@ public class SudokuEngine : BaseGameEngine
             "hard" => 300,
             _ => 30
         };
+        OnGameFinished?.Invoke(Score);
+        return;
 
     }
 

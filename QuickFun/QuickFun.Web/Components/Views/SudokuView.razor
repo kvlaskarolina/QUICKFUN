@@ -1,4 +1,11 @@
 @using QuickFun.Games.Engines.Sudoku
+@using QuickFun.Games.Engines
+@using QuickFun.Domain.Enums
+@using QuickFun.Application.Interfaces
+@using QuickFun.Domain.Entities
+
+@inject IGameSessionService SessionService
+
 @namespace QuickFun.Web.Components.Views
 
 <div class="sudoku-container">
@@ -150,5 +157,25 @@
         {
             Engine.UpdateCell(r, c, 0);
         }
+    }
+    protected override void OnParametersSet()
+    {
+        Engine.OnGameFinished -= HandleSaveScore;
+        Engine.OnGameFinished += HandleSaveScore;
+    }
+
+    private async void HandleSaveScore(int finalScore)
+    {
+        var result = new GameResult
+        {
+            Type = Engine.Type,
+            Score = finalScore
+        };
+        await SessionService.AddGameResultAsync(result);
+        await InvokeAsync(StateHasChanged);
+    }
+    public void Dispose()
+    {
+        if (Engine != null) Engine.OnGameFinished -= HandleSaveScore;
     }
 }
