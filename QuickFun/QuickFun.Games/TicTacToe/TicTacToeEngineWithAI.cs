@@ -9,7 +9,9 @@ namespace QuickFun.Games.Engines.TicTacToe.AI
     {
         private ITicTacToeDifficultyStrategy _aiStrategy;
         private readonly CommandHistory _history = new CommandHistory();
+        public event Action<int>? OnGameFinished;
 
+        public override GameType Type => GameType.TicTacToeWithAI; 
         public TicTacToeEngineWithAI(ITicTacToeDifficultyStrategy strategy)
         {
             _aiStrategy = strategy;
@@ -28,6 +30,8 @@ namespace QuickFun.Games.Engines.TicTacToe.AI
             _history.Clear();
             if (_aiStrategy == null) _aiStrategy = new TicTacToeMediumStrategy();
             Score = 20;
+            IsGameOver = false;
+            Message = "Your turn! (X)";
         }
 
         public void ResetGame() => Reset();
@@ -69,9 +73,16 @@ namespace QuickFun.Games.Engines.TicTacToe.AI
             {
                 Message = "You WON!";
                 IsGameOver = true;
+                OnGameFinished?.Invoke(Score);
                 return;
             }
-            if (IsBoardFull()) { Message = "DRAW!"; IsGameOver = true; Score = 0; return; }
+            if (IsBoardFull()) {
+                Message = "DRAW!";
+                IsGameOver = true;
+                Score = 0;
+                OnGameFinished?.Invoke(Score);
+                return;
+            }
 
             CurrentPlayer = 'O';
             await Task.Delay(500);
@@ -82,8 +93,20 @@ namespace QuickFun.Games.Engines.TicTacToe.AI
                 var aiCmd = new MoveCommand(Board, aiMove, CurrentPlayer, () => { });
                 _history.ExecuteCommand(aiCmd);
 
-                if (CheckWinner()) { Message = "TAKE THE L LOOSER!"; IsGameOver = true; Score -= 30; return; }
-                if (IsBoardFull()) { Message = "DRAW!"; IsGameOver = true; Score = 0; return; }
+                if (CheckWinner()) {
+                    Message = "TAKE THE L LOSER!";
+                    IsGameOver = true;
+                    Score -= 30;
+                    OnGameFinished?.Invoke(Score);
+                    return;
+                }
+                if (IsBoardFull()) {
+                    Message = "DRAW!";
+                    IsGameOver = true;
+                    Score = 0;
+                    OnGameFinished?.Invoke(Score);
+                    return;
+                }
 
                 CurrentPlayer = 'X';
             }
