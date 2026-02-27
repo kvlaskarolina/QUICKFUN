@@ -45,7 +45,7 @@ public class LocalStorageGameSessionService : IGameSessionService
             else
             {
                 //jezeli sie nie udalo wyciagnac tokena to nie jestesmy zalogowani
-                Console.WriteLine("Ostrzeżenie: Brak tokena. Użytkownik chyba nie jest zalogowany!");
+                Console.WriteLine("Warning! There is no token. User might not be singed in");
             }
 
 
