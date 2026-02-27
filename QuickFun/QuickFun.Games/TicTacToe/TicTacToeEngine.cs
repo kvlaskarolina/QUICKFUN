@@ -7,7 +7,7 @@ namespace QuickFun.Games.Engines.TicTacToe
     {
         public override GameType Type => GameType.TicTacToe;
         public override string Name => "TicTacToe";
-        public int Score { get; protected set; } = 0;
+        public int Score { get; protected set; } = 10;
         public char[] Board { get; protected set; } = new char[9];
         public char CurrentPlayer { get; protected set; } = 'X';
         public bool IsGameOver { get; protected set; }
@@ -20,10 +20,10 @@ namespace QuickFun.Games.Engines.TicTacToe
 
         public void Reset()
         {
-            Board = new char[9]; // puste znaki
+            Board = new char[9];
             CurrentPlayer = 'X';
             IsGameOver = false;
-            Score = 0;
+            Score = 10;
             Message = "X starts";
         }
 
@@ -32,12 +32,12 @@ namespace QuickFun.Games.Engines.TicTacToe
             if (IsGameOver || Board[index] != '\0') return;
 
             Board[index] = CurrentPlayer;
+            Score -= 1;
 
             if (CheckWinner())
             {
                 Message = $"{CurrentPlayer} WON!";
                 IsGameOver = true;
-                Score = 1;
             }
             else if (Board.All(c => c != '\0'))
             {

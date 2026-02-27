@@ -13,11 +13,13 @@ namespace QuickFun.Games.Engines.TicTacToe.AI
         public TicTacToeEngineWithAI(ITicTacToeDifficultyStrategy strategy)
         {
             _aiStrategy = strategy;
+            Score = 20;
         }
 
         public TicTacToeEngineWithAI()
         {
             _aiStrategy = new TicTacToeMediumStrategy();
+            Score = 20;
         }
 
         public new void Reset()
@@ -25,6 +27,7 @@ namespace QuickFun.Games.Engines.TicTacToe.AI
             base.Reset();
             _history.Clear();
             if (_aiStrategy == null) _aiStrategy = new TicTacToeMediumStrategy();
+            Score = 20;
         }
 
         public void ResetGame() => Reset();
@@ -38,6 +41,7 @@ namespace QuickFun.Games.Engines.TicTacToe.AI
 
             CurrentPlayer = 'X';
             Message = "Undo performed.";
+            Score -= 5;
         }
 
         public void SetDifficulty(Level level)
@@ -58,9 +62,15 @@ namespace QuickFun.Games.Engines.TicTacToe.AI
 
             // Ruch Gracza przez Command
             var playerCmd = new MoveCommand(Board, index, CurrentPlayer, () => { });
+            Score -= 1;
             _history.ExecuteCommand(playerCmd);
 
-            if (CheckWinner()) { Message = "You WON!"; IsGameOver = true; Score = 1; return; }
+            if (CheckWinner())
+            {
+                Message = "You WON!";
+                IsGameOver = true;
+                return;
+            }
             if (IsBoardFull()) { Message = "DRAW!"; IsGameOver = true; Score = 0; return; }
 
             CurrentPlayer = 'O';
@@ -72,7 +82,7 @@ namespace QuickFun.Games.Engines.TicTacToe.AI
                 var aiCmd = new MoveCommand(Board, aiMove, CurrentPlayer, () => { });
                 _history.ExecuteCommand(aiCmd);
 
-                if (CheckWinner()) { Message = "TAKE THE L LOOSER!"; IsGameOver = true; Score = -1; return; }
+                if (CheckWinner()) { Message = "TAKE THE L LOOSER!"; IsGameOver = true; Score -= 30; return; }
                 if (IsBoardFull()) { Message = "DRAW!"; IsGameOver = true; Score = 0; return; }
 
                 CurrentPlayer = 'X';
