@@ -25,6 +25,6 @@ namespace QuickFun.Games.Base
             Message = string.Empty;
         }
 
-        public virtual void OnReset() { }
+        public abstract void OnReset();
     }
 }

@@ -95,5 +95,5 @@ public class SudokuEngine : BaseGameEngine
 
     }
 
-    public void Reset() => Board = null;
+    public override void OnReset() => Board = null;
 }
