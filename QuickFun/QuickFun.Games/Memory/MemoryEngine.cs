@@ -151,10 +151,12 @@ public class MemoryEngine : BaseGameEngine
         {
             _firstCard.IsMatched = true;
             _secondCard.IsMatched = true;
-            if (_strategy != null) {
+            if (_strategy != null)
+            {
                 Score += _strategy.ScorePerRound;
             }
-            else {
+            else
+            {
                 Score += 5;
             }
             Message = "Pair found!";
@@ -173,6 +175,10 @@ public class MemoryEngine : BaseGameEngine
         _isBusy = false;
 
         CheckWin();
+    }
+    public override void OnReset()
+    {
+        Reset();
     }
 
     private void CheckWin()

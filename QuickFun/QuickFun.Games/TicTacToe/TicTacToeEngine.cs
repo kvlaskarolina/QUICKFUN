@@ -18,7 +18,7 @@ namespace QuickFun.Games.Engines.TicTacToe
             Reset();
         }
 
-        public void Reset()
+        void Reset()
         {
             Board = new char[9];
             CurrentPlayer = 'X';
@@ -26,7 +26,10 @@ namespace QuickFun.Games.Engines.TicTacToe
             Score = 10;
             Message = "X starts";
         }
-
+        public override void OnReset()
+        {
+            Reset();
+        }
         public void MakeMove(int index)
         {
             if (IsGameOver || Board[index] != '\0') return;

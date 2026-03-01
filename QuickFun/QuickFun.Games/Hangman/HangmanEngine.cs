@@ -56,7 +56,10 @@ namespace QuickFun.Games.Hangman
 
             _currentState = new NotStartedState();
         }
-
+        public override void OnReset()
+        {
+            Reset();
+        }
         public void Reset()
         {
             WordToGuess = _wordProvider.GetRandomWord();

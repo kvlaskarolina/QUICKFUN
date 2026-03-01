@@ -13,6 +13,7 @@ namespace QuickFun.Games.Base
 
         public void Reset()
         {
+            System.Console.WriteLine($"Resetting {Name}...");
             ResetState();
             OnReset();
         }
@@ -24,6 +25,6 @@ namespace QuickFun.Games.Base
             Message = string.Empty;
         }
 
-        protected virtual void OnReset() { }
+        public abstract void OnReset();
     }
 }
