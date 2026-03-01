@@ -24,7 +24,7 @@ public class SudokuEngine : BaseGameEngine
         _httpClient = httpClient;
     }
 
-    public async Task Start(Func<Task> onStateChanged) => await LoadBoard("medium", onStateChanged);
+    public async Task Start(Func<Task> onStateChanged) => await LoadBoard(Difficulty, onStateChanged);
 
     public async Task LoadBoard(string difficulty, Func<Task> onStateChanged)
     {

@@ -29,7 +29,14 @@ namespace QuickFun.Games.Engines.TicTacToe.AI
 
         public void Undo()
         {
-            _board[_index] = '\0'; // Przywracamy puste pole
+            _board[_index] = '\0';
+            _onChanged?.Invoke();
+        }
+
+        public void Restart()
+        {
+            for (int i = 0; i < _board.Length; i++)
+                _board[i] = '\0';
             _onChanged?.Invoke();
         }
     }

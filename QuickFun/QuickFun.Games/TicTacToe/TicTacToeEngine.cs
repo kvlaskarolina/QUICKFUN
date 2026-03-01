@@ -15,10 +15,10 @@ namespace QuickFun.Games.Engines.TicTacToe
 
         public TicTacToeEngine()
         {
-            Reset();
+            OnReset();
         }
 
-        public void Reset()
+        void OnReset()
         {
             Board = new char[9];
             CurrentPlayer = 'X';
