@@ -43,10 +43,11 @@ public class MinesweeperEngine : BaseGameEngine
     public MinesweeperEngine(IMinesweeperFloodingStrategy strategy)
     {
         _strategy = strategy;
-        Reset();
+        OnReset();
     }
-    public void Reset()
+    public override void OnReset()
     {
+        Console.WriteLine("Resetting Minesweeper...");
         Board = new MinesweeperCell[_rows, _cols];
         for (int r = 0; r < _rows; r++)
         {
@@ -180,7 +181,7 @@ public class MinesweeperEngine : BaseGameEngine
         {
             Message = "take the L";
         }
-        
+
         OnGameFinished?.Invoke(Score);
 
         if (outcome)
@@ -229,7 +230,7 @@ public class MinesweeperEngine : BaseGameEngine
                     };
                     total += cellValue;
                 }
-                
+
             }
         }
 
