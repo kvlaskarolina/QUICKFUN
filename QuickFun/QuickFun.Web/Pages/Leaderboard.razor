@@ -1,9 +1,9 @@
 @page "/leaderboard"
 @using QuickFun.Domain.Enums
-@using System.Net.Http.Headers
 @using QuickFun.Domain.Entities
-@inject HttpClient Http
-@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@using QuickFun.Web.ViewModels
+
+@inject LeaderboardViewModel VM
 
 <div class="stats-container">
     <h2>Hall of Fame</h2>
@@ -12,8 +12,8 @@
     @*automatycznie tworzy przycisk dla kazdej gry z Enuma*@
         @foreach (GameType type in Enum.GetValues(typeof(GameType)))
         {
-            <button class="tab-btn @(selectedGame == type ? "active" : "")"
-                    @onclick="() => ChangeGame(type)">
+            <button class="tab-btn @(VM.selectedGame == type ? "active" : "")"
+                    @onclick="() => VM.ChangeGame(type)">
                 @type
             </button>
         }
@@ -22,12 +22,12 @@
     <div class="grid-stats">
         <section class="stat-section">
             <h3>Global Top 5</h3>
-            @if (topScores == null) { <p>Loading...</p> }
+            @if (VM.topScores == null) { <p>Loading...</p> }
             else {
                 <table class="table">
                     <thead><tr><th>Player</th><th>Best Score</th></tr></thead>
                     <tbody>
-                        @foreach (var entry in topScores) {
+                        @foreach (var entry in VM.topScores) {
                             <tr><td>@entry.Username</td><td>@entry.Score</td></tr>
                         }
                     </tbody>
@@ -36,9 +36,9 @@
         </section>
 
         <section class="stat-section my-stats">
-    <h3>My Stats (@selectedGame)</h3>
+    <h3>My Stats (@VM.selectedGame)</h3>
 
-    @if (!isLoggedIn)
+    @if (!VM.isLoggedIn)
     {
         @* gostek jest gosciem*@
         <div class="auth-prompt">
@@ -46,11 +46,11 @@
             <a href="/login?returnUrl=/leaderboard" class="btn-link">Log in to track your scores!</a>
         </div>
     }
-    else if (myCurrentGameStat == null)
+    else if (VM.myCurrentGameStat == null)
     {
         @*zalogowany ale nie gral jeszcze w ta gre *@
         <div class="no-data-prompt">
-            <p>You haven't played <strong>@selectedGame</strong> yet.</p>
+            <p>You haven't played <strong>@VM.selectedGame</strong> yet.</p>
             <p>Go to the home page and play a session to see your rank here!</p>
         </div>
     }
@@ -58,9 +58,9 @@
     {
         @*zalogowany i ma już jakieś punkty w tej grze*@
         <div class="my-score-card">
-            <p>Best: <strong>@myCurrentGameStat.BestScore</strong></p>
-            <p>Total: @myCurrentGameStat.TotalScore</p>
-            <p>Games played: @myCurrentGameStat.GamesPlayed</p>
+            <p>Best: <strong>@VM.myCurrentGameStat.BestScore</strong></p>
+            <p>Total: @VM.myCurrentGameStat.TotalScore</p>
+            <p>Games played: @VM.myCurrentGameStat.GamesPlayed</p>
         </div>
     }
 </section>
@@ -68,51 +68,9 @@
 </div>
 
 @code {
-    private GameType selectedGame = GameType.TicTacToeWithAI;
-    private List<LeaderboardDto>? topScores;
-    private UserStatDto? myCurrentGameStat;
-    private bool isLoggedIn = false;
-    protected override async Task OnInitializedAsync() => await RefreshData();
-
-    private async Task ChangeGame(GameType type) {
-        selectedGame = type;
-        await RefreshData();
-    }
-
-    private async Task RefreshData() {
-        // Zawsze czyścimy stare statystyki przed pobraniem nowych, 
-        // żeby nie pokazywać przez sekundę wyniku z poprzedniej gry
-        myCurrentGameStat = null;
-
-        // 1. Pobierz Global Top 5 (Dostępne dla każdego)
-        topScores = await Http.GetFromJsonAsync<List<LeaderboardDto>>($"api/stats/leaderboard/{selectedGame}");
-
-        // 2. Obsługa logowania i statystyk prywatnych
-        var token = await LocalStorage.GetItemAsync<string>("authToken");
-        isLoggedIn = !string.IsNullOrEmpty(token);
-
-        if (isLoggedIn) {
-            try {
-                var request = new HttpRequestMessage(HttpMethod.Get, "api/stats/my-stats");
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                
-                var response = await Http.SendAsync(request);
-                
-                if (response.IsSuccessStatusCode) {
-                    var allMyStats = await response.Content.ReadFromJsonAsync<List<UserStatDto>>();
-                    // Szukamy rekordu dla obecnie wybranej gry
-                    myCurrentGameStat = allMyStats?.FirstOrDefault(x => x.GameName == selectedGame.ToString());
-                }
-                else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized) {
-                    // Token wygasł w trakcie przeglądania
-                    isLoggedIn = false;
-                    await LocalStorage.RemoveItemAsync("authToken");
-                }
-            }
-            catch {
-                isLoggedIn = false;
-            }
-        }
+    protected override async Task OnInitializedAsync()
+    {
+        await VM.RefreshData();
     }
 }
 

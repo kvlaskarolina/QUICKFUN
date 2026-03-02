@@ -1,14 +1,13 @@
 ﻿@page "/"
 @using QuickFun.Web.Layout.ProductSliderComponent
-@using System.Net.Http.Headers
-@inject HttpClient Http
-@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@using QuickFun.Web.ViewModels
+@inject HomeViewModel VM
 
 <PageTitle>Home</PageTitle>
 
-@if (!string.IsNullOrEmpty(nickname))
+@if (!string.IsNullOrEmpty(VM.Nickname))
 {
-    <h1>Hello, @nickname!</h1>
+    <h1>Hello, @VM.Nickname!</h1>
     <p>Great to see you again. Ready to break some records?</p>
 }
 else
@@ -21,33 +20,9 @@ else
 
 @code
 {
-    private string? nickname;
-
-    protected override async Task OnInitializedAsync(){
-        //czy w "schowku" jest token
-        var token = await LocalStorage.GetItemAsync<string>("authToken");
-
-        if (!string.IsNullOrEmpty(token))
-        {
-            try
-            {
-                //tworzymy zapytanie i dodajemy token do niego
-                var request = new HttpRequestMessage(HttpMethod.Get, "api/account/me");
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                
-                var response = await Http.SendAsync(request);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    var info = await response.Content.ReadFromJsonAsync<UserInfo>();
-                    nickname = info?.Username;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Nie udało się pobrać profilu: {ex.Message}");
-            }
-        }
+    //widok tylko inicjalizuje na starcie
+    protected override async Task OnInitializedAsync()
+    {
+        await VM.InitializeAsync();
     }
-    private class UserInfo { public string Username { get; set; } = ""; }
 }

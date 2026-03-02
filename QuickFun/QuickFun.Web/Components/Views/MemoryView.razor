@@ -1,97 +1,71 @@
 @using QuickFun.Games.Memory
 @using QuickFun.Games.Memory.Strategies
-@using QuickFun.Domain.Enums
-@using QuickFun.Application.Interfaces
-@using QuickFun.Domain.Entities
-@inject IGameSessionService SessionService
-
+@using QuickFun.Web.ViewModels
 @namespace QuickFun.Web.Components.Views
+@implements IDisposable
+@inject MemoryViewModel VM
 
 <div class="memory-view">
-    @if (!isDifficultySelected)
+    @if (!VM.IsDifficultySelected)
     {
-        @* EKRAN WYBORU POZIOMU *@
         <div class="difficulty-overlay">
             <h3>Choose difficulty</h3>
             <div class="difficulty-buttons">
-                <button class="btn-diff easy" @onclick="() => SelectDifficulty(new EasyStrategyMemory())">
+                <button class="btn-diff easy" @onclick='() => VM.SelectDifficulty(new EasyStrategyMemory(), () => InvokeAsync(StateHasChanged))'>
                     easy <small>(4x4)</small>
                 </button>
-                <button class="btn-diff medium" @onclick="() => SelectDifficulty(new MediumStrategyMemory())">
+                <button class="btn-diff medium" @onclick='() => VM.SelectDifficulty(new MediumStrategyMemory(), () => InvokeAsync(StateHasChanged))'>
                     medium <small>(6x4)</small>
                 </button>
-                <button class="btn-diff hard" @onclick="() => SelectDifficulty(new HardStrategyMemory())">
+                <button class="btn-diff hard" @onclick='() => VM.SelectDifficulty(new HardStrategyMemory(), () => InvokeAsync(StateHasChanged))'>
                     hard <small>(6x6)</small>
                 </button>
             </div>
         </div>
     }
-    else
+    else if (VM.Engine != null)
     {
-        @* WIDOK GRY *@
         <div class="game-header">
-            <p class="status-message">@Engine.Message</p>
-            <p class="score">Points: @Engine.Score</p>
+            <p class="status-message">@VM.Engine.Message</p>
+            <p class="score">Points: @VM.Engine.Score</p>
 
-            <button class="btn-change-level" @onclick="() => isDifficultySelected = false">
+            <button class="btn-change-level" @onclick="VM.ChangeLevel">
                 <span>«</span> change difficulty
             </button>
         </div>
-        @* DYNAMICZNY GRID: Liczba kolumn zależy od wybranej strategii *@
-    <div class="board-memory" style="grid-template-columns: repeat(@Engine.Columns, 1fr);">
-        @foreach (var card in Engine.Cards)
-        {
-            <button class="memory-card @(card.IsRevealed || card.IsMatched ? "flipped" : "")"
-                    @onclick="() => OnCardClick(card)"
-                    disabled="@(Engine.IsGameOver || card.IsMatched)">
-                
-                @if (card.IsRevealed || card.IsMatched)
-                {
-                    <img src="@card.ImageUrl" class="card-img" />
-                }
-                else
-                {
-                    <span class="card-back">?</span>
-                }
-            </button>
-        }
-    </div>
-}
+
+        <div class="board-memory" style="grid-template-columns: repeat(@VM.Engine.Columns, 1fr);">
+            @foreach (var card in VM.Engine.Cards)
+            {
+                <button class="memory-card @(card.IsRevealed || card.IsMatched ? "flipped" : "")"
+                        @onclick="() => VM.HandleCardClick(card)"
+                        disabled="@(VM.Engine.IsGameOver || card.IsMatched)">
+                    
+                    @if (card.IsRevealed || card.IsMatched)
+                    {
+                        <img src="@card.ImageUrl" class="card-img" />
+                    }
+                    else
+                    {
+                        <span class="card-back">?</span>
+                    }
+                </button>
+            }
+        </div>
+    }
 </div>
+
 @code {
-[Parameter] public MemoryEngine Engine { get; set; } = default!;
-private bool isDifficultySelected = false;
-private async Task SelectDifficulty(IMemoryDifficultyStrategy strategy)
-{
-    isDifficultySelected = true;
-    Engine.SetDifficulty(strategy);
+    [Parameter] public MemoryEngine Engine { get; set; } = default!;
 
-    await Engine.Start(() => InvokeAsync(StateHasChanged));
+    protected override void OnParametersSet()
+    {
+        VM.Initialize(Engine); //inicjalizacja
+    }
+
+    public void Dispose() => VM.Dispose();
 }
 
-protected override void OnInitialized()
-{
-    // Nie odpalamy Engine.Start() tutaj, bo czekamy na wybór poziomu
-    Engine.OnGameFinished += HandleSaveScore;
-}
-
-private async void HandleSaveScore(int finalScore){
-
-    var result = new GameResult
-        {
-            Type = Engine.Type,
-            Score = finalScore
-        };
-
-    await SessionService.AddGameResultAsync(result); //serwis wysyla to do api
-    await InvokeAsync(StateHasChanged);
-}
-
-private async Task OnCardClick(MemoryCard card)
-{
-    await Engine.HandleCardClick(card);
-}
-}
 
 <style>
     .memory-view {

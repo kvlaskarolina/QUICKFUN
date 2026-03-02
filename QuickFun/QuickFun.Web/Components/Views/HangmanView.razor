@@ -1,13 +1,11 @@
 @using QuickFun.Games.Hangman
-@using QuickFun.Domain.Enums
-@using QuickFun.Application.Interfaces
-@using QuickFun.Domain.Entities
-
+@using QuickFun.Web.ViewModels
 @namespace QuickFun.Web.Components.Views
-@inject IGameSessionService SessionService
+@implements IDisposable
+@inject HangmanViewModel VM
 
 <div class="hangman-container">
-    @if (Engine == null)
+    @if (VM.Engine == null)
     {
         <p>Loading...</p>
     }
@@ -15,51 +13,51 @@
     {
         <div class="difficulty-selector">
             <label>Difficulty:</label>
-            <select @onchange="OnDifficultyChanged" disabled="@(Engine.WordToGuess != string.Empty && !Engine.IsGameOver)">
-                <option value="@HangmanDifficulty.Easy" selected="@(Engine.Difficulty == HangmanDifficulty.Easy)">
+            <select @onchange="OnDifficultyChanged" disabled="@(VM.Engine.WordToGuess != string.Empty && !VM.Engine.IsGameOver)">
+                <option value="@HangmanDifficulty.Easy" selected="@(VM.Engine.Difficulty == HangmanDifficulty.Easy)">
                     Easy (10 tries, short words)
                 </option>
-                <option value="@HangmanDifficulty.Medium" selected="@(Engine.Difficulty == HangmanDifficulty.Medium)">
+                <option value="@HangmanDifficulty.Medium" selected="@(VM.Engine.Difficulty == HangmanDifficulty.Medium)">
                     Medium (7 tries, medium words)
                 </option>
-                <option value="@HangmanDifficulty.Hard" selected="@(Engine.Difficulty == HangmanDifficulty.Hard)">
+                <option value="@HangmanDifficulty.Hard" selected="@(VM.Engine.Difficulty == HangmanDifficulty.Hard)">
                     Hard (5 tries, long words)
                 </option>
             </select>
 
-            @if (Engine.WordToGuess == string.Empty)
+            @if (VM.Engine.WordToGuess == string.Empty)
             {
-                <button class="btn-start" @onclick="StartGame">Start Game</button>
+                <button class="btn-start" @onclick="VM.StartGame">Start Game</button>
             }
         </div>
 
         <div class="game-info">
-            <span class="info-badge">Difficulty: <strong>@Engine.Difficulty</strong></span>
-            <span class="info-badge">Attempts: <strong>@(Engine.MaxAttempts - Engine.WrongAttempts) / @Engine.MaxAttempts</strong></span>
-            <span class="info-badge state-badge">State: <strong>@Engine.GetCurrentStateName()</strong></span>
-            <span class="info-badge">Score: <strong>@Engine.Score</strong></span>
+            <span class="info-badge">Difficulty: <strong>@VM.Engine.Difficulty</strong></span>
+            <span class="info-badge">Attempts: <strong>@(VM.Engine.MaxAttempts - VM.Engine.WrongAttempts) / @VM.Engine.MaxAttempts</strong></span>
+            <span class="info-badge state-badge">State: <strong>@VM.Engine.GetCurrentStateName()</strong></span>
+            <span class="info-badge">Score: <strong>@VM.Engine.Score</strong></span>
         </div>
 
         <div class="hangman-box">
-            <pre class="hangman-picture">@Engine.HangmanPicture</pre>
+            <pre class="hangman-picture">@VM.Engine.HangmanPicture</pre>
         </div>
 
-        <p class="status-msg">@Engine.Message</p>
+        <p class="status-msg">@VM.Engine.Message</p>
 
         <div class="word-display">
-            @foreach (var c in Engine.CurrentGuess)
+            @foreach (var c in VM.Engine.CurrentGuess)
             {
                 <span class="letter-box">@c</span>
             }
         </div>
 
         <div class="letters-grid">
-            @foreach (var letter in letters)
+            @foreach (var letter in VM.Letters)
             {
                 var l = letter;
                 <button class="btn-letter"
-                        @onclick="() => HandleGuess(l)"
-                        disabled="@(UsedLetters.Contains(l) || Engine.IsGameOver)">
+                        @onclick="() => VM.HandleGuess(l)"
+                        disabled="@(VM.GetUsedLetters().Contains(l) || VM.Engine.IsGameOver)">
                     @l
                 </button>
             }
@@ -68,28 +66,17 @@
 </div>
 
 @code {
-    [Parameter]
-    public HangmanEngine? Engine { get; set; }
+    [Parameter] public HangmanEngine? Engine { get; set; }
+    [Parameter] public EventCallback<HangmanDifficulty> OnDifficultyChange { get; set; }
 
-    [Parameter]
-    public EventCallback<HangmanDifficulty> OnDifficultyChange { get; set; }
-
-    private char[] letters = "abcdefghijklmnopqrstuvwxyz".ToCharArray();
-
-    private HashSet<char> UsedLetters
-    {
-        get => Engine?.GuessedLetters != null
-            ? new HashSet<char>(Engine.GuessedLetters)
-            : new HashSet<char>();
-    }
-    protected override void OnParametersSet()
+    protected override void OnParametersSet() //metoda pilnuje zeby viewmodel zawsze byl podpiety do aktualnego silnika
     {
         if (Engine != null)
         {
-            Engine.OnGameFinished -= HandleSaveScore;
-            Engine.OnGameFinished += HandleSaveScore;
+            VM.SetEngine(Engine); //tylko inicjalizacja
         }
     }
+
     private async Task OnDifficultyChanged(ChangeEventArgs e)
     {
         if (Enum.TryParse<HangmanDifficulty>(e.Value?.ToString(), out var difficulty))
@@ -98,43 +85,7 @@
         }
     }
 
-    private void StartGame()
-    {
-        if (Engine == null) return;
-        Engine.Reset();
-        StateHasChanged();
-    }
-
-    private async void HandleSaveScore(int finalScore)
-    {
-        if (Engine == null) return;
-
-        var result = new GameResult
-            {
-                Type = Engine.Type,
-                Score = finalScore
-            };
-
-        await SessionService.AddGameResultAsync(result); //serwis wysyla to do api
-        await InvokeAsync(StateHasChanged);
-    }
-
-    private void HandleGuess(char letter)
-    {
-        if (Engine == null || Engine.IsGameOver) return;
-
-        Engine.MakeMove(letter);
-
-        StateHasChanged();
-    }
-
-    public void Dispose()
-    {
-        if (Engine != null)
-        {
-            Engine.OnGameFinished -= HandleSaveScore;
-        }
-    }
+    public void Dispose() => VM.Dispose();
 }
 
 <style>

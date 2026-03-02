@@ -1,16 +1,15 @@
 @using QuickFun.Games.Minesweeper
-@using QuickFun.Application.Interfaces
-@using QuickFun.Domain.Entities
-@inject IGameSessionService SessionService
+@using QuickFun.Web.ViewModels
 @namespace QuickFun.Web.Components.Views
 @implements IDisposable
+@inject MinesweeperViewModel VM
 
 <div class="saper-container">
     @* NAGŁÓWEK *@
     <div class="saper-header">
         <div class="status-box">
-            <span class="status-text @(Engine.IsWin ? "win-text" : Engine.IsGameOver ? "loss-text" : "")">
-                @Engine.Message
+            <span class="status-text @(VM.Engine.IsWin ? "win-text" : VM.Engine.IsGameOver ? "loss-text" : "")">
+                @VM.Engine.Message
             </span>
         </div>
         <div class="stats-bar">
@@ -34,15 +33,15 @@
                 {
                     var row = r;
                     var col = c;
-                    var cell = Engine.Board[row, col];
+                    var cell = VM.Engine.Board[row, col];
 
                     <div class="saper-cell
                         @(cell.IsRevealed ? "revealed" : "hidden")
-                        @((cell.IsMine && cell.IsRevealed && !Engine.IsWin) ? "mine-loss" : "")
-                        @((cell.IsMine && cell.IsRevealed && Engine.IsWin) ? "mine-win" : "")"
-                        @onclick="() => Engine.HandleClick(row, col)"
+                        @((cell.IsMine && cell.IsRevealed && !VM.Engine.IsWin) ? "mine-loss" : "")
+                        @((cell.IsMine && cell.IsRevealed && VM.Engine.IsWin) ? "mine-win" : "")"
+                        @onclick="() => VM.Engine.HandleClick(row, col)"
                         @oncontextmenu:preventDefault="true"
-                        @oncontextmenu="() => Engine.SwitchFlag(row, col)">
+                        @oncontextmenu="() => VM.Engine.SwitchFlag(row, col)">
 
                         @if (cell.IsFlagged && !cell.IsRevealed)
                         {
@@ -66,7 +65,7 @@
     </div>
 
     @* STOPKA *@
-    @if (Engine.IsGameOver)
+    @if (VM.Engine.IsGameOver)
     {
         <div class="saper-footer">
             <button class="btn-reset" @onclick="Engine.Reset">
@@ -81,33 +80,15 @@
 
     protected override void OnParametersSet()
     {
-        Engine.OnStateChanged -= HandleStateChanged;
-        Engine.OnGameFinished -= HandleSaveScore;
+        VM.SetEngine(Engine);
+        VM.OnNotifyView += HandleUpdate;
 
-        Engine.OnStateChanged += HandleStateChanged;
-        Engine.OnGameFinished += HandleSaveScore;
     }
-
-    private void HandleStateChanged()
-    {
-        // InvokeAsync jest kluczowe przy używaniu Task.Delay w silniku
-        InvokeAsync(StateHasChanged);
-    }
-
-    private async void HandleSaveScore(int finalScore)
-    {
-        var result = new GameResult
-        {
-            Type = Engine.Type,
-            Score = finalScore
-        };
-
-        await SessionService.AddGameResultAsync(result);
-        await InvokeAsync(StateHasChanged);
-    }
+    private void HandleUpdate() => InvokeAsync(StateHasChanged);
     public void Dispose()
     {
-        Engine.OnStateChanged -= HandleStateChanged;
+        VM.OnNotifyView -= HandleUpdate;
+        VM.Dispose();
     }
 }
 
