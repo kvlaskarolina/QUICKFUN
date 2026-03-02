@@ -1,91 +1,41 @@
 @page "/login"
-@inject HttpClient Http
-@inject NavigationManager Nav
-@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@using QuickFun.Web.ViewModels
+@inject LoginViewModel VM
 
 <div class="auth-container">
     <h2>Log in</h2>
 
     <div class="input-group">
         <label>Email</label>
-        <input @bind="email" type="email" placeholder="Enter your email"/>
+        <input @bind="VM.email" type="email" placeholder="Enter your email"/>
     </div>
 
     <div class="input-group">
         <label>Password</label>
-        <input @bind="password" type="password" placeholder="Enter your password"/>
+        <input @bind="VM.password" type="password" placeholder="Enter your password"/>
     </div>
 
-    <button class="btn-submit" @onclick="HandleLogin">Log in</button>
+    <button class="btn-submit" @onclick="VM.HandleLogin">Log in</button>
 
-    @if (!string.IsNullOrEmpty(errorMessage))
+    @if (!string.IsNullOrEmpty(VM.errorMessage))
     {
-        <p class="error-msg">@errorMessage</p>
+        <p class="error-msg">@VM.errorMessage</p>
     }
 </div>
 
 @code
 {
-    private string email = "";
-    private string password = "";
-    private string errorMessage = "";
-
+    //widok pobiera parametr z URL
     [Parameter]
     [SupplyParameterFromQuery(Name = "returnUrl")]
-    public string? ReturnUrl { get; set; }
+    public string? ReturnUrlFromQuery { get; set; }
 
-    //metoda do debugowania
     protected override void OnInitialized()
     {
-        Console.WriteLine($"Wykryty ReturnUrl: {ReturnUrl}");
+        //przekazuje return URL do widoku
+        VM.ReturnUrl = ReturnUrlFromQuery;
+        Console.WriteLine($"ReturnUrl detected: {VM.ReturnUrl}");
     }
-
-    private class AuthResponse
-    {
-        public string accessToken { get; set; } = "";
-    }
-
-    private async Task HandleLogin()
-    {
-        //wysylamy zapytanie json do endpointu /api/accountlogin ktory sami zrobilismy
-        var response = await Http.PostAsJsonAsync("/api/account/login", new { email = email, password = password });
-        if (response.IsSuccessStatusCode)
-        {
-            //dostajemy od serwera w odpowiedzi obiekt ktory w srodku ma specjalny access token
-            var result = await response.Content.ReadFromJsonAsync<AuthResponse>();
-            
-            if (result != null && !string.IsNullOrEmpty(result.accessToken))
-            {
-                //narazie token jest w pamieci ram, ale ram sie kasuje za kazdym odswiezeniem strony
-                //dlatego chowamy token do local storage przelgadarki
-                //czat mowi ze "LocalStorage to taki mały dysk twardy wewnątrz Twojej przeglądarki."
-                await LocalStorage.SetItemAsync("authToken", result.accessToken);
-
-                // Jeśli wiemy skąd przyszedł użytkownik (ReturnUrl), odsyłamy go tam.
-                // W przeciwnym razie idziemy na stronę główną "/".
-                string destination = !string.IsNullOrEmpty(ReturnUrl) ? ReturnUrl : "/";
-                Console.WriteLine($"Przekierowuję do: {destination}");
-                
-                //przechodzimy do strony głownej po udanym zalogowaniu
-                Nav.NavigateTo(destination, forceLoad: true);
-            }
-        }
-        else
-        {
-            // Czytamy co dokładnie odpowiedział serwer
-            var errorContent = await response.Content.ReadAsStringAsync();
-            Console.WriteLine($"BŁĄD LOGOWANIA ({response.StatusCode}): {errorContent}");
-            
-            errorMessage = response.StatusCode switch
-        {
-            System.Net.HttpStatusCode.Unauthorized => "Invalid email or password. Please try again.",
-            System.Net.HttpStatusCode.BadRequest => "The login request was invalid.",
-            System.Net.HttpStatusCode.InternalServerError => "Server error. Please try again later.",
-            _ => "An unexpected error occurred. Please check your connection."
-        };
-
-        }
-        }
 }
 
 <style>

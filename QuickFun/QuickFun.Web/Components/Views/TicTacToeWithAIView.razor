@@ -1,90 +1,69 @@
 @using QuickFun.Games.Engines
 @using QuickFun.Domain.Enums
-@using QuickFun.Application.Interfaces
-@using QuickFun.Domain.Entities
-@using QuickFun.Games.TicTacToe.Strategies
 @using QuickFun.Games.Engines.TicTacToe.AI
-@inject IGameSessionService SessionService
-
+@using QuickFun.Web.ViewModels
+@using QuickFun.Games.TicTacToe.Strategies;
 @namespace QuickFun.Web.Components.Views
+@implements IDisposable
+@inject TicTacToeWithAIViewModel VM
 
 <div class="game-container">
-    <div class="difficulty-buttons">
-        <button class="btn-diff easy @(selectedLevel == Level.Easy ? "active" : "")"
-            @onclick="() => SetDifficulty(Level.Easy)">
-            Easy
-        </button>
-        <button class="btn-diff medium @(selectedLevel == Level.Medium ? "active" : "")"
-            @onclick="() => SetDifficulty(Level.Medium)">
-            Medium
-        </button>
-        <button class="btn-diff hard @(selectedLevel == Level.Hard ? "active" : "")"
-            @onclick="() => SetDifficulty(Level.Hard)">
-            Hard
-        </button>
-    </div>
-
-    <p class="status-message">@Engine.Message</p>
-
-    <h3>Score: @Engine.Score</h3>
-
-
-    <div class="board">
-        @for (int i = 0; i < 9; i++)
-        {
-            int index = i;
-            <button class="cell" @onclick="async () => await Engine.MakeMove(index)"
-                disabled="@(Engine.IsGameOver || Engine.Board[index] != '\0')">
-                @Engine.Board[index]
+    @if (VM.Engine == null)
+    {
+        <p>Loading engine...</p>
+    }
+    else
+    {
+        <div class="difficulty-buttons">
+            <button class="btn-diff easy @(VM.SelectedLevel == Level.Easy ? "active" : "")"
+                @onclick="() => VM.SetDifficulty(Level.Easy)">
+                Easy
             </button>
-        }
-    </div>
-    <button class="btn btn-secondary" @onclick="UndoMove" disabled="@Engine.IsGameOver">
-        Undo Move
-    </button>
+            <button class="btn-diff medium @(VM.SelectedLevel == Level.Medium ? "active" : "")"
+                @onclick="() => VM.SetDifficulty(Level.Medium)">
+                Medium
+            </button>
+            <button class="btn-diff hard @(VM.SelectedLevel == Level.Hard ? "active" : "")"
+                @onclick="() => VM.SetDifficulty(Level.Hard)">
+                Hard
+            </button>
+        </div>
+
+        <p class="status-message">@VM.Engine.Message</p>
+        <h3>Score: @VM.Engine.Score</h3>
+
+        <div class="board">
+            @for (int i = 0; i < 9; i++)
+            {
+                int index = i;
+                <button class="cell" @onclick="async () => await VM.MakeMove(index)"
+                    disabled="@(VM.Engine.IsGameOver || VM.Engine.Board[index] != '\0')">
+                    @VM.Engine.Board[index]
+                </button>
+            }
+        </div>
+        
+        <button class="btn btn-secondary" @onclick="VM.UndoMove" disabled="@VM.Engine.IsGameOver">
+            Undo Move
+        </button>
+    }
 </div>
 
 @code {
-    [Parameter]
-    public TicTacToeEngineWithAI Engine { get; set; }
-    private Level selectedLevel = Level.Medium;
+    [Parameter] public TicTacToeEngineWithAI Engine { get; set; } = default!;
 
     protected override void OnParametersSet()
     {
-        Engine.OnGameFinished -= HandleSaveScore;
-        Engine.OnGameFinished += HandleSaveScore;
+        VM.SetEngine(Engine);
+        VM.OnNotifyView += HandleUpdate;
     }
 
-    private async void HandleSaveScore(int finalScore)
-    {
-        var result = new GameResult
-        {
-            Type = Engine.Type,
-            Score = finalScore
-        };
-        await SessionService.AddGameResultAsync(result);
-        await InvokeAsync(StateHasChanged);
-    }
-    private void UndoMove()
-    {
-        Engine.Undo();
-    }
-
-    private void SetDifficulty(Level level)
-    {
-        Engine.SetDifficulty(level);
-        selectedLevel = level;
-        ResetGame();
-    }
-
-    private void ResetGame()
-    {
-        Engine.ResetGame();
-    }
+    private void HandleUpdate() => InvokeAsync(StateHasChanged);
 
     public void Dispose()
     {
-        if (Engine != null) Engine.OnGameFinished -= HandleSaveScore;
+        VM.OnNotifyView -= HandleUpdate;
+        VM.Dispose();
     }
 }
 <style>
