@@ -23,8 +23,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Server\**" />
-    <EmbeddedResource Remove="Server\**" />
-    <None Remove="Server\**" />
+    <Compile Remove="Server/**" />
+<EmbeddedResource Remove="Server/**" />
+<None Remove="Server/**" />
   </ItemGroup>
 </Project>
