@@ -9,6 +9,7 @@ using QuickFun.Games.Minesweeper;
 using QuickFun.Games.Engines.TicTacToe;
 using QuickFun.Games.Engines.TicTacToe.AI;
 using QuickFun.Games.TicTacToe.Strategies;
+using QuickFun.Games.Engines.MasterMind;
 
 namespace QuickFun.Games
 {
@@ -37,6 +38,7 @@ namespace QuickFun.Games
                 GameType.Minesweeper => new MinesweeperEngine(new QuickFun.Games.Minesweeper.Strategies.DfsFloodingStrategy()),
                 GameType.Hangman => HangmanFactory.CreateGame(),
                 GameType.Sudoku => new SudokuEngine(_httpClientFactory.CreateClient("SudokuApi")),
+                GameType.MasterMind => new MasterMindEngine(),
                 _ => throw new ArgumentException("Nieznana gra")
             };
         }

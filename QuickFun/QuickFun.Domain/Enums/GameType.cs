@@ -7,6 +7,7 @@ namespace QuickFun.Domain.Enums
         Memory,
         Hangman,
         Sudoku,
-        Minesweeper
+        Minesweeper,
+        MasterMind
     }
 }
