@@ -50,16 +50,19 @@
     private List<GameItem> sampleGames = new()
 {
 new GameItem { Id = 1, Name = "Memory", Category = "Logic", ImageUrl = "/images/games/memory.png", href="/game/memory"},
-new GameItem { Id = 2, Name = "Tic Tac Toe", Category = "Strategy", ImageUrl = "/images/games/tictactoe.png",
-href="/game/tictactoe" },
+
+new GameItem { Id = 2, Name = "MasterMind", Category = "Logic", href="/game/mastermind", ImageUrl =
+"/images/games/mastermind.png" },
 new GameItem { Id = 3, Name = "Sudoku", Category = "Logic", ImageUrl = "/images/games/sudoku.png", href="/game/sudoku"
 },
 new GameItem { Id = 4, Name = "Minesweeper", Category = "Classic", ImageUrl = "/images/games/minesweeper.png",
 href="/game/minesweeper" },
 new GameItem { Id = 5, Name = "Tic Tac Toe vs AI", Category = "Strategy", ImageUrl = "/images/games/tictactoeAI.png",
 href="/game/tictactoewithai" },
-new GameItem { Id = 6, Name = "Hangman", Category = "Word", href="/game/hangman", ImageUrl = "/images/games/hangman.png"
-}
+new GameItem { Id = 6, Name = "Hangman", Category = "Word", href="/game/hangman", ImageUrl =
+"/images/games/hangman.png",},
+new GameItem { Id = 7, Name = "Tic Tac Toe", Category = "Strategy", ImageUrl = "/images/games/tictactoe.png",
+href="/game/tictactoe" }
 };
 
     protected override void OnAfterRender(bool firstRender)
