@@ -5,6 +5,7 @@
 @using QuickFun.Games.Engines
 @using QuickFun.Games.Engines.TicTacToe.AI
 @using QuickFun.Games.Engines.TicTacToe
+@using QuickFun.Games.Engines.MasterMind
 @using QuickFun.Games.Memory
 @using QuickFun.Games.Hangman
 @using QuickFun.Games.Minesweeper
@@ -51,6 +52,10 @@
             else if (CurrentGame is MinesweeperEngine ms)
             {
                 <MinesweeperView Engine="ms" />
+            }
+            else if (CurrentGame is MasterMindEngine mm)
+            {
+                <MasterMindView Engine="mm" />
             }
         </div>
 
@@ -104,7 +109,8 @@
 
         if (CurrentGame is SudokuEngine sudoku)
             await sudoku.Start(() => InvokeAsync(StateHasChanged));
-
+        if (CurrentGame is MasterMindEngine mastermind)
+            await mastermind.Start(() => InvokeAsync(StateHasChanged));
         StateHasChanged();
     }
 

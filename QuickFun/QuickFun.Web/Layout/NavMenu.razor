@@ -6,51 +6,56 @@
         </button>
     </div>
 </div>
-
-    <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
-        <nav class="nav flex-column">
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                    <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-                </NavLink>
-            </div>
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="/leaderboard">
-                    <span class="bi bi-trophy-fill-nav-menu" aria-hidden="true"></span> Leaderboard
-                </NavLink>
-            </div>
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="/game/tictactoe">
-                    <span class="bi bi-controller-nav-menu" aria-hidden="true"></span> TicTacToe
-                </NavLink>
-            </div>
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="/game/tictactoewithai">
-                    <span class="bi bi-controller-nav-menu" aria-hidden="true"></span> TicTacToe with AI
-                </NavLink>
-            </div>
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="/game/memory">
-                    <span class="bi bi-controller-nav-menu" aria-hidden="true"></span> Memory
-                </NavLink>
-            </div>
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="/game/hangman">
-                    <span class="bi bi-controller-nav-menu" aria-hidden="true"></span> Hangman
-                </NavLink>
-            </div>
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="/game/minesweeper">
-                    <span class="bi bi-controller-nav-menu" aria-hidden="true"></span> Minesweeper
-                </NavLink>
-            </div>
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="/game/sudoku">
-                    <span class="bi bi-controller-nav-menu" aria-hidden="true"></span> Sudoku
-                </NavLink>
-            </div>
-        </nav>
-    </div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+    <nav class="nav flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/leaderboard">
+                <span class="bi bi-trophy-fill-nav-menu" aria-hidden="true"></span> Leaderboard
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/game/tictactoe">
+                <span class="bi bi-tictactoe-nav-menu" aria-hidden="true"></span> TicTacToe
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/game/tictactoewithai">
+                <span class="bi bi-robot-nav-menu" aria-hidden="true"></span> TicTacToe with AI
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/game/memory">
+                <span class="bi bi-memory-nav-menu" aria-hidden="true"></span> Memory
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/game/hangman">
+                <span class="bi bi-hangman-nav-menu" aria-hidden="true"></span> Hangman
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/game/minesweeper">
+                <span class="bi bi-minesweeper-nav-menu" aria-hidden="true"></span> Minesweeper
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/game/sudoku">
+                <span class="bi bi-sudoku-nav-menu" aria-hidden="true"></span> Sudoku
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/game/mastermind">
+                <span class="bi bi-mastermind-nav-menu" aria-hidden="true"></span> MasterMind
+            </NavLink>
+        </div>
+    </nav>
+</div>
 
 @code {
     private bool collapseNavMenu = true;
