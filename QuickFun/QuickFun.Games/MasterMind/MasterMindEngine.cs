@@ -66,9 +66,9 @@ public class MasterMindEngine : BaseGameEngine
 
         if (guess == SecretCode)
         {
-            Message = $"You cracked the code in {Score} attempt{(Score == 1 ? "" : "s")}!";
+            Message = $"You cracked the code in {Score} attempt{(Score == 1 ? "" : "s")}! Your score: {(11 - Score) * Colors}";
             IsGameOver = true;
-            OnGameFinished?.Invoke((10 - Score) * Colors);
+            OnGameFinished?.Invoke((11 - Score) * Colors);
         }
         else if (Score >= MaxAttempts)
         {
