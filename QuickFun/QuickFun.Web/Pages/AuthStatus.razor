@@ -6,12 +6,12 @@
 <div class="auth-status">
     @if (isLoggedIn)
     {
-        <button class="nav-btn logout" @onclick="HandleLogout">Log out</button>
+        <button class="nav-btn logout" @onclick="HandleLogout">LOG OUT</button>
     }
     else
     {
-        <a class="nav-link-auth" href="/login">Log in</a>
-        <a class="nav-link-auth sign-up" href="/register">Sign up</a>
+        <a class="nav-link-auth" href="/login">LOG IN</a>
+        <a class="nav-link-auth sign-up" href="/register">SIGN UP</a>
     }
 </div>
 
@@ -21,7 +21,7 @@
     protected override async Task OnInitializedAsync()
     {
         var token = await LocalStorage.GetItemAsync<string>("authToken");
-        
+
         if (string.IsNullOrEmpty(token))
         {
             isLoggedIn = false;
@@ -33,25 +33,16 @@
                 var request = new HttpRequestMessage(HttpMethod.Get, "api/account/me");
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 var response = await Http.SendAsync(request);
-
                 isLoggedIn = response.IsSuccessStatusCode;
-
-                if (!isLoggedIn)
-                {
-                    await LocalStorage.RemoveItemAsync("authToken");
-                }
+                if (!isLoggedIn) await LocalStorage.RemoveItemAsync("authToken");
             }
-            catch
-            {
-                isLoggedIn = false;
-            }
+            catch { isLoggedIn = false; }
         }
     }
 
     private async Task HandleLogout()
     {
         await LocalStorage.RemoveItemAsync("authToken");
-        // forceLoad: true odświeża całą aplikację, co zresetuje stan wszystkich komponentów
         Nav.NavigateTo("/", forceLoad: true);
     }
 }
@@ -59,46 +50,62 @@
 <style>
     .auth-status {
         display: flex;
-        gap: 15px;
+        gap: 12px;
         align-items: center;
+        font-family: 'Press Start 2P', monospace;
     }
 
     .nav-link-auth {
-        color: #0086fc;
+        color: #ffffff;
         text-decoration: none;
-        font-weight: 500;
-        font-size: 0.95rem;
+        font-size: 0.45rem;
+        letter-spacing: 0.08em;
+        padding: 7px 12px;
+        border: 2px solid #444;
+        transition: all 0.1s steps(1);
     }
 
     .nav-link-auth:hover {
-        text-decoration: underline;
+        color: #ff7b00;
+        border-color: #ff7b00;
+        text-decoration: none;
     }
 
     .sign-up {
-        background-color: #28a745;
-        color: white !important;
-        padding: 6px 12px;
-        border-radius: 4px;
+        background: #ffe600;
+        color: #000 !important;
+        border: none;
+        box-shadow: 2px 2px 0 #b38f00;
     }
 
     .sign-up:hover {
-        background-color: #218838;
+        background: #ff7b00 !important;
+        color: #fff !important;
+        box-shadow: 1px 1px 0 #b35000;
+        transform: translate(1px, 1px);
         text-decoration: none !important;
     }
 
-    .logout {
-        background: none;
-        border: 1px solid #dc3545;
-        color: #dc3545;
-        padding: 5px 12px;
-        border-radius: 4px;
+    .nav-btn {
+        font-family: 'Press Start 2P', monospace;
+        font-size: 0.45rem;
+        letter-spacing: 0.08em;
         cursor: pointer;
-        font-weight: 500;
-        transition: 0.2s;
+        transition: all 0.1s steps(1);
+    }
+
+    .logout {
+        background: transparent;
+        border: 2px solid #e74c3c;
+        color: #e74c3c;
+        padding: 7px 12px;
+        box-shadow: 2px 2px 0 #7b1c12;
     }
 
     .logout:hover {
-        background-color: #dc3545;
-        color: white;
+        background: #e74c3c;
+        color: #fff;
+        box-shadow: 1px 1px 0 #7b1c12;
+        transform: translate(1px, 1px);
     }
 </style>

@@ -6,64 +6,87 @@
 @inject LeaderboardViewModel VM
 
 <div class="stats-container">
-    <h2>Hall of Fame</h2>
+    <h2 class="page-title">★ HALL OF FAME ★</h2>
 
     <div class="tabs">
-    @*automatycznie tworzy przycisk dla kazdej gry z Enuma*@
         @foreach (GameType type in Enum.GetValues(typeof(GameType)))
         {
-            <button class="tab-btn @(VM.selectedGame == type ? "active" : "")"
-                    @onclick="() => VM.ChangeGame(type)">
-                @type
+            <button class="tab-btn @(VM.selectedGame == type ? "active" : "")" @onclick="() => VM.ChangeGame(type)">
+                @type.ToString().ToUpper()
             </button>
         }
     </div>
 
     <div class="grid-stats">
         <section class="stat-section">
-            <h3>Global Top 5</h3>
-            @if (VM.topScores == null) { <p>Loading...</p> }
-            else {
+            <h3 class="section-title">GLOBAL TOP 5</h3>
+            @if (VM.topScores == null)
+            {
+                <p class="loading-text">LOADING...</p>
+            }
+            else
+            {
                 <table class="table">
-                    <thead><tr><th>Player</th><th>Best Score</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>PLAYER</th>
+                            <th>SCORE</th>
+                        </tr>
+                    </thead>
                     <tbody>
-                        @foreach (var entry in VM.topScores) {
-                            <tr><td>@entry.Username</td><td>@entry.Score</td></tr>
+                        @{
+                            int rank = 1;
+                        }
+                        @foreach (var entry in VM.topScores)
+                        {
+                            <tr class="@(rank == 1 ? "rank-1" : rank == 2 ? "rank-2" : rank == 3 ? "rank-3" : "")">
+                                <td class="rank-cell">@(rank++)</td>
+                                <td>@entry.Username</td>
+                                <td class="score-cell">@entry.Score</td>
+                            </tr>
                         }
                     </tbody>
                 </table>
             }
         </section>
 
-        <section class="stat-section my-stats">
-    <h3>My Stats (@VM.selectedGame)</h3>
+        <section class="stat-section">
+            <h3 class="section-title">MY STATS</h3>
+            <p class="game-subtitle">@VM.selectedGame.ToString().ToUpper()</p>
 
-    @if (!VM.isLoggedIn)
-    {
-        @* gostek jest gosciem*@
-        <div class="auth-prompt">
-            <p>You are not logged in.</p>
-            <a href="/login?returnUrl=/leaderboard" class="btn-link">Log in to track your scores!</a>
-        </div>
-    }
-    else if (VM.myCurrentGameStat == null)
-    {
-        @*zalogowany ale nie gral jeszcze w ta gre *@
-        <div class="no-data-prompt">
-            <p>You haven't played <strong>@VM.selectedGame</strong> yet.</p>
-            <p>Go to the home page and play a session to see your rank here!</p>
-        </div>
-    }
-    else
-    {
-        @*zalogowany i ma już jakieś punkty w tej grze*@
-        <div class="my-score-card">
-            <p>Best: <strong>@VM.myCurrentGameStat.BestScore</strong></p>
-            <p>Total: @VM.myCurrentGameStat.TotalScore</p>
-            <p>Games played: @VM.myCurrentGameStat.GamesPlayed</p>
-        </div>
-    }
-</section>
+            @if (!VM.isLoggedIn)
+            {
+                <div class="auth-prompt">
+                    <p class="prompt-text">NOT LOGGED IN</p>
+                    <a href="/login?returnUrl=/leaderboard" class="btn-prompt">▶ LOG IN TO TRACK SCORES</a>
+                </div>
+            }
+            else if (VM.myCurrentGameStat == null)
+            {
+                <div class="no-data-prompt">
+                    <p class="prompt-text">NO DATA YET</p>
+                    <p class="prompt-sub">Play a game of @VM.selectedGame to see your stats!</p>
+                </div>
+            }
+            else
+            {
+                <div class="my-score-card">
+                    <div class="score-row">
+                        <span class="score-label">BEST</span>
+                        <span class="score-value gold">@VM.myCurrentGameStat.BestScore</span>
+                    </div>
+                    <div class="score-row">
+                        <span class="score-label">TOTAL</span>
+                        <span class="score-value">@VM.myCurrentGameStat.TotalScore</span>
+                    </div>
+                    <div class="score-row">
+                        <span class="score-label">GAMES</span>
+                        <span class="score-value">@VM.myCurrentGameStat.GamesPlayed</span>
+                    </div>
+                </div>
+            }
+        </section>
     </div>
 </div>
 
@@ -75,34 +98,241 @@
 }
 
 <style>
-    .stats-container { max-width: 800px; margin: 20px auto; color: #333; }
-    .tabs { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 10px; }
-    .tab-btn { padding: 8px 16px; border: none; border-radius: 20px; cursor: pointer; background: #eee; }
-    .tab-btn.active { background: #007bff; color: white; }
-    .grid-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
-    .stat-section { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-    .table { width: 100%; border-collapse: collapse; }
-    .table th, .table td { text-align: left; padding: 10px; border-bottom: 1px solid #eee; }
-    .my-score-card { background: #f0f7ff; padding: 15px; border-radius: 8px; border-left: 4px solid #007bff; }
-    .no-data-prompt {
-        background-color: #fffaf0;
-        border-left: 4px solid #f6ad55;
-        padding: 15px;
-        border-radius: 8px;
-        color: #7b341e;
+    .stats-container {
+        max-width: 860px;
+        margin: 20px auto;
+        font-family: 'Press Start 2P', monospace;
+        color: #ffffff;
+        padding: 0 16px;
     }
 
-    .auth-prompt {
-        background-color: #f7fafc;
-        border: 1px dashed #cbd5e0;
-        padding: 15px;
-        border-radius: 8px;
+    .page-title {
+        font-size: 1rem;
+        color: #ffe600;
+        text-shadow: 3px 3px 0 #b38f00, 0 0 16px rgba(255, 230, 0, 0.3);
+        text-align: center;
+        margin-bottom: 28px;
+        letter-spacing: 0.08em;
+    }
+
+    /* TABS */
+    .tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 24px;
+        overflow-x: auto;
+        padding-bottom: 8px;
+        flex-wrap: wrap;
+    }
+
+    .tab-btn {
+        padding: 8px 14px;
+        border: 2px solid #333;
+        background: #111;
+        color: #888;
+        font-family: 'Press Start 2P', monospace;
+        font-size: 0.45rem;
+        cursor: pointer;
+        letter-spacing: 0.05em;
+        box-shadow: 2px 2px 0 #000;
+        transition: all 0.1s steps(1);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        border-color: #ff7b00;
+        color: #ff7b00;
+        box-shadow: 1px 1px 0 #000;
+        transform: translate(1px, 1px);
+    }
+
+    .tab-btn.active {
+        background: #ffe600;
+        color: #000;
+        border-color: #ffe600;
+        box-shadow: 2px 2px 0 #b38f00;
+    }
+
+    /* GRID */
+    .grid-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+    }
+
+
+
+    .stat-section {
+        background: #0d0d0d;
+        padding: 20px;
+        border: 2px solid #222;
+        box-shadow: 4px 4px 0 #000;
+    }
+
+    .section-title {
+        font-size: 0.55rem;
+        color: #ffe600;
+        margin-bottom: 6px;
+        letter-spacing: 0.1em;
+        text-shadow: 1px 1px 0 #b38f00;
+    }
+
+    .game-subtitle {
+        font-size: 0.4rem;
+        color: #ff7b00;
+        margin-bottom: 16px;
+        letter-spacing: 0.08em;
+    }
+
+    .loading-text {
+        font-size: 0.45rem;
+        color: #555;
+        animation: blink 1s steps(1) infinite;
+    }
+
+    blink {
+
+        0%,
+        100% {
+            opacity: 1
+        }
+
+        50% {
+            opacity: 0
+        }
+    }
+
+    /* TABLE */
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.45rem;
+    }
+
+    .table th {
+        text-align: left;
+        padding: 8px 10px;
+        color: #888;
+        border-bottom: 2px solid #222;
+        letter-spacing: 0.08em;
+    }
+
+    .table td {
+        padding: 10px;
+        border-bottom: 1px solid #1a1a1a;
+        color: #ccc;
+    }
+
+    .table tr:hover td {
+        background: #111;
+        color: #fff;
+    }
+
+    .rank-cell {
+        color: #555;
+    }
+
+    .score-cell {
+        color: #ffe600;
+        font-weight: bold;
+    }
+
+    .rank-1 td {
+        color: #ffe600 !important;
+    }
+
+    .rank-1 .rank-cell::before {
+        content: '★ ';
+    }
+
+    .rank-2 td {
+        color: #c0c0c0 !important;
+    }
+
+    .rank-3 td {
+        color: #cd7f32 !important;
+    }
+
+    /* MY SCORE CARD */
+    .my-score-card {
+        background: #111;
+        border: 2px solid #ffe600;
+        padding: 16px;
+        box-shadow: 3px 3px 0 #b38f00;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .score-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.45rem;
+        border-bottom: 1px solid #1e1e1e;
+        padding-bottom: 8px;
+    }
+
+    .score-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .score-label {
+        color: #666;
+        letter-spacing: 0.1em;
+    }
+
+    .score-value {
+        color: #ffffff;
+    }
+
+    .score-value.gold {
+        color: #ffe600;
+        text-shadow: 0 0 8px rgba(255, 230, 0, 0.4);
+    }
+
+    /* PROMPTS */
+    .auth-prompt,
+    .no-data-prompt {
+        background: #111;
+        border: 2px dashed #333;
+        padding: 20px;
         text-align: center;
     }
 
-    .btn-link {
-        color: #007bff;
-        text-decoration: underline;
-        font-weight: bold;
+    .prompt-text {
+        font-size: 0.5rem;
+        color: #555;
+        margin-bottom: 14px;
+        letter-spacing: 0.1em;
+    }
+
+    .prompt-sub {
+        font-size: 0.4rem;
+        color: #444;
+        letter-spacing: 0.05em;
+        line-height: 1.8;
+    }
+
+    .btn-prompt {
+        display: inline-block;
+        padding: 10px 16px;
+        background: #ffe600;
+        color: #000;
+        text-decoration: none;
+        font-family: 'Press Start 2P', monospace;
+        font-size: 0.45rem;
+        box-shadow: 2px 2px 0 #b38f00;
+        transition: all 0.1s steps(1);
+        letter-spacing: 0.05em;
+    }
+
+    .btn-prompt:hover {
+        background: #ff7b00;
+        color: #fff;
+        box-shadow: 1px 1px 0 #b35000;
+        transform: translate(1px, 1px);
+        text-decoration: none;
     }
 </style>

@@ -9,16 +9,16 @@
     @if (!VM.IsDifficultySelected)
     {
         <div class="difficulty-overlay">
-            <h3>Choose difficulty</h3>
+            <h3 class="overlay-title">— SELECT DIFFICULTY —</h3>
             <div class="difficulty-buttons">
                 <button class="btn-diff easy" @onclick='() => VM.SelectDifficulty(new EasyStrategyMemory(), () => InvokeAsync(StateHasChanged))'>
-                    easy <small>(4x4)</small>
+                    EASY <small>4 × 4</small>
                 </button>
                 <button class="btn-diff medium" @onclick='() => VM.SelectDifficulty(new MediumStrategyMemory(), () => InvokeAsync(StateHasChanged))'>
-                    medium <small>(6x4)</small>
+                    MEDIUM <small>6 × 4</small>
                 </button>
                 <button class="btn-diff hard" @onclick='() => VM.SelectDifficulty(new HardStrategyMemory(), () => InvokeAsync(StateHasChanged))'>
-                    hard <small>(6x6)</small>
+                    HARD <small>6 × 6</small>
                 </button>
             </div>
         </div>
@@ -27,20 +27,18 @@
     {
         <div class="game-header">
             <p class="status-message">@VM.Engine.Message</p>
-            <p class="score">Points: @VM.Engine.Score</p>
-
+            <p class="score">SCORE: @VM.Engine.Score</p>
             <button class="btn-change-level" @onclick="VM.ChangeLevel">
-                <span>«</span> change difficulty
+                « CHANGE LEVEL
             </button>
         </div>
 
         <div class="board-memory" style="grid-template-columns: repeat(@VM.Engine.Columns, 1fr);">
             @foreach (var card in VM.Engine.Cards)
             {
-                <button class="memory-card @(card.IsRevealed || card.IsMatched ? "flipped" : "")"
+                <button class="memory-card @(card.IsRevealed || card.IsMatched ? "flipped" : "") @(card.IsMatched ? "matched" : "")"
                         @onclick="() => VM.HandleCardClick(card)"
                         disabled="@(VM.Engine.IsGameOver || card.IsMatched)">
-                    
                     @if (card.IsRevealed || card.IsMatched)
                     {
                         <img src="@card.ImageUrl" class="card-img" />
@@ -60,50 +58,107 @@
 
     protected override void OnParametersSet()
     {
-        VM.Initialize(Engine); //inicjalizacja
+        VM.Initialize(Engine);
     }
 
     public void Dispose() => VM.Dispose();
 }
 
-
 <style>
     .memory-view {
         width: 100%;
-        max-width: 500px;
+        max-width: 560px;
         margin: 0 auto;
+        padding-bottom: 45px;
+        font-family: 'Press Start 2P', monospace;
+        background: #0a0a0a;
+        color: #ffffff;
     }
 
+    /* DIFFICULTY */
     .difficulty-overlay {
         text-align: center;
-        padding: 20px;
+        padding: 30px 20px;
+    }
+
+    .overlay-title {
+        font-size: 0.7rem;
+        color: #ffe600;
+        letter-spacing: 0.1em;
+        text-shadow: 2px 2px 0 #b38f00;
+        margin-bottom: 24px;
     }
 
     .difficulty-buttons {
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 12px;
         margin-top: 15px;
     }
 
     .btn-diff {
-        padding: 15px;
+        padding: 16px;
         border: none;
-        border-radius: 8px;
-        font-weight: bold;
-        color: white;
+        border-radius: 0;
+        font-family: 'Press Start 2P', monospace;
+        font-size: 0.65rem;
+        color: #000;
         cursor: pointer;
-        transition: transform 0.2s;
-        font-size: 1.1rem;
+        box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+        transition: all 0.1s steps(1);
+        letter-spacing: 0.05em;
     }
 
-    .btn-diff:hover { transform: scale(1.02); }
-    .btn-diff small { display: block; font-weight: normal; opacity: 0.8; }
+    .btn-diff:hover { transform: translate(2px,2px); box-shadow: 2px 2px 0 rgba(0,0,0,0.5); }
+    .btn-diff small { display: block; font-size: 0.45rem; margin-top: 6px; font-family: 'Press Start 2P', monospace; opacity: 0.8; }
 
-    .easy { background-color: #27ae60; }
-    .medium { background-color: #f39c12; }
-    .hard { background-color: #e74c3c; }
+    .easy   { background: #2ecc71; }
+    .medium { background: #f39c12; }
+    .hard   { background: #e74c3c; }
 
+    /* HEADER */
+    .game-header { text-align: center; margin-bottom: 16px; }
+
+    .status-message {
+        font-size: 0.6rem;
+        color: #ff7b00;
+        text-shadow: 0 0 8px rgba(255,123,0,0.5);
+        margin-bottom: 6px;
+        min-height: 1.5em;
+        letter-spacing: 0.05em;
+    }
+
+    .score {
+        font-size: 0.55rem;
+        color: #ffe600;
+        margin-bottom: 10px;
+        letter-spacing: 0.08em;
+    }
+
+    .btn-change-level {
+        background: #1a1a1a;
+        color: #ffe600;
+        border: 2px solid #ffe600;
+        padding: 8px 16px;
+        font-family: 'Press Start 2P', monospace;
+        font-size: 0.5rem;
+        cursor: pointer;
+        box-shadow: 2px 2px 0 #b38f00;
+        transition: all 0.1s steps(1);
+        letter-spacing: 0.05em;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-change-level:hover {
+        background: #ffe600;
+        color: #000;
+        box-shadow: 1px 1px 0 #b38f00;
+        transform: translate(1px,1px);
+        text-decoration: none;
+    }
+
+    /* BOARD */
     .board-memory {
         display: grid;
         gap: 8px;
@@ -115,20 +170,33 @@
     .memory-card {
         width: 100%;
         aspect-ratio: 1 / 1;
-        background: #2c3e50;
-        border-radius: 6px;
-        border: none;
+        background: #1a1a1a;
+        border: 2px solid #333;
+        border-radius: 0;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 4px;
-        transition: transform 0.2s;
+        transition: all 0.1s steps(1);
+        box-shadow: 3px 3px 0 #000;
+    }
+
+    .memory-card:hover:not(:disabled) {
+        border-color: #ff7b00;
+        box-shadow: 3px 3px 0 #ff7b00;
     }
 
     .memory-card.flipped {
-        background: white;
-        border: 2px solid #3498db;
+        background: #111;
+        border: 2px solid #ffe600;
+        box-shadow: 0 0 10px rgba(255,230,0,0.3);
+    }
+
+    .memory-card.matched {
+        border: 2px solid #2ecc71;
+        box-shadow: 0 0 10px rgba(46,204,113,0.4);
+        opacity: 0.7;
     }
 
     .card-img {
@@ -137,66 +205,10 @@
         object-fit: contain;
     }
 
-    .status-message {
-        font-size: 1.1rem;
-        font-weight: bold;
-        text-align: center;
-        margin-bottom: 5px;
-        min-height: 1.5em;
-    }
-
-    .score {
-        text-align: center;
-        color: #666;
-        margin-bottom: 10px;
-    }
-
-    .view-footer {
-        margin-top: 15px;
-        text-align: center;
-    }
-
-    .btn-change-level {
-        background: none;
-        border: none;
-        color: #3498db;
-        text-decoration: underline;
-        cursor: pointer;
-        font-size: 0.9rem;
-    }
-
-    .game-header {
-        text-align: center;
-        margin-bottom: 15px;
-    }
-
-    .btn-change-level {
-        background-color: #0086fc;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 4px;
-        font-weight: bold;
-        cursor: pointer;
-        font-size: 0.9rem;
-        transition: background-color 0.2s, transform 0.1s;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        text-decoration: none;
-    }
-
-    .btn-change-level:hover {
-        background-color: #5a6268;
-        transform: translateY(-1px);
-        text-decoration: none;
-    }
-
-    .btn-change-level:active {
-        transform: translateY(0);
-    }
-
-    .memory-view {
-        padding-bottom: 45px;
+    .card-back {
+        font-family: 'Press Start 2P', monospace;
+        font-size: 1.2rem;
+        color: #ffe600;
+        text-shadow: 0 0 8px rgba(255,230,0,0.5);
     }
 </style>
