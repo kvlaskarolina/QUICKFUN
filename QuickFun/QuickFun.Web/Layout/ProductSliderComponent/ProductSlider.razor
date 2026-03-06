@@ -180,7 +180,7 @@ el.scrollTo({{ left: {index} * (itemWidth + 20), behavior: 'smooth' }});
 
     .card-img {
         height: 180px;
-        background: #111;
+        background: #fc7b7b;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -196,14 +196,10 @@ el.scrollTo({{ left: {index} * (itemWidth + 20), behavior: 'smooth' }});
         max-height: 85%;
         max-width: 85%;
         object-fit: contain;
-        filter: drop-shadow(0 0 8px rgba(255, 230, 0, 0.2));
         transition: filter 0.1s steps(2);
         image-rendering: pixelated;
     }
 
-    .game-card:hover .card-img img {
-        filter: drop-shadow(0 0 12px rgba(255, 123, 0, 0.5));
-    }
 
     .card-body {
         padding: 16px;
@@ -212,6 +208,7 @@ el.scrollTo({{ left: {index} * (itemWidth + 20), behavior: 'smooth' }});
         flex-direction: column;
         gap: 8px;
         flex: 1;
+        color: #fff;
     }
 
     .category {
@@ -227,7 +224,7 @@ el.scrollTo({{ left: {index} * (itemWidth + 20), behavior: 'smooth' }});
 
     .card-body h3 {
         font-size: 0.55rem;
-        color: #ffffff;
+        color: #ff7b00;
         letter-spacing: 0.05em;
         margin: 0;
         line-height: 1.5;
