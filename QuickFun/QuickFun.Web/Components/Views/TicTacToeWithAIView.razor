@@ -10,41 +10,37 @@
 <div class="game-container">
     @if (VM.Engine == null)
     {
-        <p>Loading engine...</p>
+        <p class="loading-text">LOADING ENGINE...</p>
     }
     else
     {
         <div class="difficulty-buttons">
             <button class="btn-diff easy @(VM.SelectedLevel == Level.Easy ? "active" : "")"
-                @onclick="() => VM.SetDifficulty(Level.Easy)">
-                Easy
-            </button>
+                @onclick="() => VM.SetDifficulty(Level.Easy)">EASY</button>
             <button class="btn-diff medium @(VM.SelectedLevel == Level.Medium ? "active" : "")"
-                @onclick="() => VM.SetDifficulty(Level.Medium)">
-                Medium
-            </button>
+                @onclick="() => VM.SetDifficulty(Level.Medium)">MEDIUM</button>
             <button class="btn-diff hard @(VM.SelectedLevel == Level.Hard ? "active" : "")"
-                @onclick="() => VM.SetDifficulty(Level.Hard)">
-                Hard
-            </button>
+                @onclick="() => VM.SetDifficulty(Level.Hard)">HARD</button>
         </div>
 
         <p class="status-message">@VM.Engine.Message</p>
-        <h3>Score: @VM.Engine.Score</h3>
+        <p class="score-text">SCORE: @VM.Engine.Score</p>
 
         <div class="board">
             @for (int i = 0; i < 9; i++)
             {
                 int index = i;
-                <button class="cell" @onclick="async () => await VM.MakeMove(index)"
+                var symbol = VM.Engine.Board[index];
+                <button class="cell @(symbol == 'X' ? "cell-x" : symbol == 'O' ? "cell-o" : "")"
+                    @onclick="async () => await VM.MakeMove(index)"
                     disabled="@(VM.Engine.IsGameOver || VM.Engine.Board[index] != '\0')">
-                    @VM.Engine.Board[index]
+                    @(symbol != '\0' ? symbol.ToString() : "")
                 </button>
             }
         </div>
-        
-        <button class="btn btn-secondary" @onclick="VM.UndoMove" disabled="@VM.Engine.IsGameOver">
-            Undo Move
+
+        <button class="btn-undo" @onclick="VM.UndoMove" disabled="@VM.Engine.IsGameOver">
+            ↩ UNDO
         </button>
     }
 </div>
@@ -66,133 +62,165 @@
         VM.Dispose();
     }
 }
+
 <style>
-    .game-layout {
-        max-width: 600px;
-        margin: 2rem auto;
-        padding: 20px;
+    .game-container {
+        max-width: 420px;
+        margin: 0 auto;
+        padding: 24px 20px;
         text-align: center;
-        background-color: #ffffff;
-        border-radius: 15px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        background: #0a0a0a;
+        font-family: 'Press Start 2P', monospace;
+        color: #ffffff;
     }
 
-    .game-title {
-        color: #333;
-        margin-bottom: 1.5rem;
-        font-size: 2.5rem;
+    .loading-text {
+        font-size: 0.6rem;
+        color: #ffe600;
+        animation: blink 1s steps(1) infinite;
     }
 
-    .game-content {
-        margin: 2rem 0;
-        min-height: 300px;
+    blink {
+
+        0%,
+        100% {
+            opacity: 1
+        }
+
+        50% {
+            opacity: 0
+        }
+    }
+
+    .difficulty-buttons {
         display: flex;
-        flex-direction: column;
+        gap: 10px;
         justify-content: center;
-        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
     }
 
     .btn-diff {
-        padding: 15px;
+        padding: 10px 16px;
         border: none;
-        border-radius: 8px;
-        font-weight: bold;
-        color: white;
+        border-radius: 0;
+        font-family: 'Press Start 2P', monospace;
+        font-size: 0.5rem;
+        color: #000;
         cursor: pointer;
-        transition: transform 0.2s;
-        font-size: 1.1rem;
-    }
-
-    .btn-diff.active {
-        outline: 4px solid #333;
+        box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.5);
+        transition: all 0.1s steps(1);
+        letter-spacing: 0.05em;
     }
 
     .btn-diff:hover {
-        transform: scale(1.02);
+        transform: translate(2px, 2px);
+        box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+    }
+
+    .btn-diff.active {
+        outline: 3px solid #ffffff;
+        outline-offset: 2px;
     }
 
     .easy {
-        background-color: #27ae60;
+        background: #2ecc71;
     }
 
     .medium {
-        background-color: #f39c12;
+        background: #f39c12;
     }
 
     .hard {
-        background-color: #e74c3c;
-    }
-
-
-    .cell {
-        width: 100px;
-        height: 100px;
-        font-size: 2.5rem;
-        font-weight: bold;
-        cursor: pointer;
-        background: #f0f0f0;
-        border: 2px solid #ccc;
-        border-radius: 8px;
+        background: #e74c3c;
+        color: #fff;
     }
 
     .status-message {
-        font-size: 1.5rem;
-        color: #333;
-        height: 2rem;
-        text-align: center;
+        font-size: 0.6rem;
+        color: #ff7b00;
+        text-shadow: 0 0 8px rgba(255, 123, 0, 0.5);
+        min-height: 2rem;
+        margin-bottom: 6px;
+        letter-spacing: 0.05em;
+    }
+
+    .score-text {
+        font-size: 0.55rem;
+        color: #ffe600;
+        margin-bottom: 16px;
+        letter-spacing: 0.08em;
     }
 
     .board {
         display: grid;
         grid-template-columns: repeat(3, 100px);
-        gap: 10px;
+        gap: 8px;
         justify-content: center;
-        margin: 20px auto;
+        margin: 0 auto 20px;
     }
 
-    .controls {
-        display: flex;
-        gap: 15px;
-        justify-content: center;
-        margin-top: 2rem;
-    }
-
-    .btn {
-        padding: 12px 25px;
-        border-radius: 8px;
-        border: none;
+    .cell {
+        width: 100px;
+        height: 100px;
+        font-size: 2rem;
+        font-family: 'Press Start 2P', monospace;
         font-weight: bold;
         cursor: pointer;
-        transition: transform 0.1s, background-color 0.2s;
+        background: #1a1a1a;
+        border: 2px solid #333;
+        border-radius: 0;
+        color: #ffffff;
+        box-shadow: 3px 3px 0 #000;
+        transition: all 0.1s steps(1);
     }
 
-    .btn:active {
-        transform: scale(0.95);
+    .cell:hover:not(:disabled) {
+        background: rgba(255, 123, 0, 0.15);
+        border-color: #ff7b00;
+        box-shadow: 1px 1px 0 #000;
+        transform: translate(2px, 2px);
     }
 
-    .btn-primary {
-        background-color: #28a745;
-        color: white;
+    .cell:disabled {
+        cursor: not-allowed;
     }
 
-    .btn-primary:hover {
-        background-color: #218838;
+    .cell-x {
+        color: #ff7b00;
+        text-shadow: 0 0 10px rgba(255, 123, 0, 0.6);
+        border-color: #ff7b00;
     }
 
-    .btn-secondary {
-        background-color: #6c757d;
-        color: white;
-        text-decoration: none;
+    .cell-o {
+        color: #ffe600;
+        text-shadow: 0 0 10px rgba(255, 230, 0, 0.6);
+        border-color: #ffe600;
     }
 
-    .btn-secondary:hover {
-        background-color: #5a6268;
+    .btn-undo {
+        padding: 10px 20px;
+        font-family: 'Press Start 2P', monospace;
+        font-size: 0.5rem;
+        background: #1a1a1a;
+        color: #ffe600;
+        border: 2px solid #ffe600;
+        cursor: pointer;
+        box-shadow: 2px 2px 0 #b38f00;
+        transition: all 0.1s steps(1);
+        letter-spacing: 0.05em;
     }
 
-    .snake-placeholder {
-        padding: 40px;
-        background-color: #e9ecef;
-        border-radius: 10px;
-        border: 2px dashed #adb5bd;
+    .btn-undo:hover:not(:disabled) {
+        background: #ffe600;
+        color: #000;
+        box-shadow: 1px 1px 0 #b38f00;
+        transform: translate(1px, 1px);
+    }
+
+    .btn-undo:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+        box-shadow: none;
     }
 </style>

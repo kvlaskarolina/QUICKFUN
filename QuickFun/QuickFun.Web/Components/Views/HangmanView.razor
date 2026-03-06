@@ -7,13 +7,14 @@
 <div class="hangman-container">
     @if (VM.Engine == null)
     {
-        <p>Loading...</p>
+        <p class="loading">Loading...</p>
     }
     else
     {
         <div class="difficulty-selector">
-            <label>Difficulty:</label>
-            <select @onchange="OnDifficultyChanged" disabled="@(VM.Engine.WordToGuess != string.Empty && !VM.Engine.IsGameOver)">
+            <label>DIFFICULTY:</label>
+            <select @onchange="OnDifficultyChanged"
+                disabled="@(VM.Engine.WordToGuess != string.Empty && !VM.Engine.IsGameOver)">
                 <option value="@HangmanDifficulty.Easy" selected="@(VM.Engine.Difficulty == HangmanDifficulty.Easy)">
                     Easy (10 tries, short words)
                 </option>
@@ -27,15 +28,16 @@
 
             @if (VM.Engine.WordToGuess == string.Empty)
             {
-                <button class="btn-start" @onclick="VM.StartGame">Start Game</button>
+                <button class="btn-start" @onclick="VM.StartGame">▶ START</button>
             }
         </div>
 
         <div class="game-info">
-            <span class="info-badge">Difficulty: <strong>@VM.Engine.Difficulty</strong></span>
-            <span class="info-badge">Attempts: <strong>@(VM.Engine.MaxAttempts - VM.Engine.WrongAttempts) / @VM.Engine.MaxAttempts</strong></span>
-            <span class="info-badge state-badge">State: <strong>@VM.Engine.GetCurrentStateName()</strong></span>
-            <span class="info-badge">Score: <strong>@VM.Engine.Score</strong></span>
+            <span class="info-badge">DIFF: <strong>@VM.Engine.Difficulty</strong></span>
+            <span class="info-badge">TRIES: <strong>@(VM.Engine.MaxAttempts -
+                                    VM.Engine.WrongAttempts)/@VM.Engine.MaxAttempts</strong></span>
+            <span class="info-badge state-badge">STATE: <strong>@VM.Engine.GetCurrentStateName()</strong></span>
+            <span class="info-badge score-badge">SCORE: <strong>@VM.Engine.Score</strong></span>
         </div>
 
         <div class="hangman-box">
@@ -55,9 +57,8 @@
             @foreach (var letter in VM.Letters)
             {
                 var l = letter;
-                <button class="btn-letter"
-                        @onclick="() => VM.HandleGuess(l)"
-                        disabled="@(VM.GetUsedLetters().Contains(l) || VM.Engine.IsGameOver)">
+                <button class="btn-letter" @onclick="() => VM.HandleGuess(l)"
+                    disabled="@(VM.GetUsedLetters().Contains(l) || VM.Engine.IsGameOver)">
                     @l
                 </button>
             }
@@ -69,20 +70,15 @@
     [Parameter] public HangmanEngine? Engine { get; set; }
     [Parameter] public EventCallback<HangmanDifficulty> OnDifficultyChange { get; set; }
 
-    protected override void OnParametersSet() //metoda pilnuje zeby viewmodel zawsze byl podpiety do aktualnego silnika
+    protected override void OnParametersSet()
     {
-        if (Engine != null)
-        {
-            VM.SetEngine(Engine); //tylko inicjalizacja
-        }
+        if (Engine != null) VM.SetEngine(Engine);
     }
 
     private async Task OnDifficultyChanged(ChangeEventArgs e)
     {
         if (Enum.TryParse<HangmanDifficulty>(e.Value?.ToString(), out var difficulty))
-        {
             await OnDifficultyChange.InvokeAsync(difficulty);
-        }
     }
 
     public void Dispose() => VM.Dispose();
@@ -94,137 +90,198 @@
         display: flex;
         flex-direction: column;
         align-items: center;
+        background: #0a0a0a;
+        min-height: 100vh;
+        padding: 20px;
+        font-family: 'Press Start 2P', monospace;
+        color: #ffffff;
+    }
+
+    .loading {
+        color: #ffe600;
+        font-family: 'Press Start 2P', monospace;
+        animation: blink 1s steps(1) infinite;
+    }
+
+    blink {
+
+        0%,
+        100% {
+            opacity: 1
+        }
+
+        50% {
+            opacity: 0
+        }
     }
 
     .difficulty-selector {
         margin-bottom: 20px;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
     }
 
     .difficulty-selector label {
-        font-weight: bold;
-        font-size: 1.1rem;
+        font-size: 0.6rem;
+        color: #ffe600;
+        letter-spacing: 0.1em;
     }
 
     .difficulty-selector select {
-        padding: 8px 15px;
-        font-size: 1rem;
-        border: 2px solid #ccc;
-        border-radius: 6px;
-        background: white;
+        padding: 8px 12px;
+        font-size: 0.55rem;
+        font-family: 'Press Start 2P', monospace;
+        border: 2px solid #ffe600;
+        border-radius: 0;
+        background: #111;
+        color: #fff;
         cursor: pointer;
+        box-shadow: 2px 2px 0 #b38f00;
     }
 
     .difficulty-selector select:disabled {
+        opacity: 0.4;
         cursor: not-allowed;
-        opacity: 0.6;
     }
 
     .btn-start {
-        padding: 10px 20px;
-        font-size: 1rem;
-        font-weight: bold;
-        background: #28a745;
-        color: white;
+        padding: 10px 18px;
+        font-size: 0.6rem;
+        font-family: 'Press Start 2P', monospace;
+        background: #ffe600;
+        color: #000;
         border: none;
-        border-radius: 6px;
+        border-radius: 0;
         cursor: pointer;
-        transition: background 0.2s;
+        box-shadow: 3px 3px 0 #b38f00;
+        transition: all 0.1s steps(1);
+        text-transform: uppercase;
     }
 
     .btn-start:hover {
-        background: #218838;
+        background: #ff7b00;
+        color: #fff;
+        box-shadow: 1px 1px 0 #b35000;
+        transform: translate(2px, 2px);
     }
 
     .game-info {
         display: flex;
-        gap: 15px;
+        gap: 10px;
         margin-bottom: 20px;
         flex-wrap: wrap;
         justify-content: center;
     }
 
     .info-badge {
-        background: #f0f0f0;
-        padding: 8px 15px;
-        border-radius: 20px;
-        font-size: 0.95rem;
-        border: 2px solid #ddd;
-    }
-
-    .state-badge {
-        background: #e3f2fd;
-        border-color: #2196f3;
+        background: #1a1a1a;
+        padding: 6px 12px;
+        font-size: 0.5rem;
+        border: 2px solid #333;
+        color: #aaa;
+        letter-spacing: 0.05em;
     }
 
     .info-badge strong {
-        color: #333;
+        color: #ffffff;
+    }
+
+    .state-badge {
+        border-color: #ff7b00;
+        color: #ff7b00;
+    }
+
+    .state-badge strong {
+        color: #ff7b00;
+    }
+
+    .score-badge {
+        border-color: #ffe600;
+    }
+
+    .score-badge strong {
+        color: #ffe600;
     }
 
     .hangman-picture {
         font-family: 'Courier New', monospace;
-        font-size: 1.2rem;
-        line-height: 1.1;
-        background: #222;
-        color: #0f0;
-        padding: 20px;
-        border-radius: 8px;
+        font-size: 1.1rem;
+        line-height: 1.2;
+        background: #0d0d0d;
+        color: #ffe600;
+        padding: 20px 28px;
         white-space: pre;
         text-align: left;
-        border: 2px solid #ccc;
+        border: 2px solid #ffe600;
+        box-shadow: 4px 4px 0 #b38f00;
     }
 
     .status-msg {
-        font-size: 1.2rem;
-        margin: 15px 0;
+        font-size: 0.65rem;
+        margin: 18px 0;
         min-height: 1.5rem;
-        color: #444;
-        font-weight: 500;
+        color: #ff7b00;
+        text-align: center;
+        letter-spacing: 0.05em;
+        text-shadow: 0 0 8px rgba(255, 123, 0, 0.5);
     }
 
     .word-display {
         margin-bottom: 30px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 4px;
     }
 
     .letter-box {
-        font-size: 2.2rem;
-        margin: 0 5px;
+        font-size: 1.8rem;
+        margin: 0 4px;
         display: inline-block;
         width: 1.2em;
-        border-bottom: 3px solid #ccc;
+        text-align: center;
+        border-bottom: 3px solid #ffe600;
         text-transform: uppercase;
-        font-weight: bold;
+        color: #ffffff;
     }
 
     .letters-grid {
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
-        gap: 8px;
-        max-width: 500px;
+        gap: 6px;
+        max-width: 520px;
     }
 
     .btn-letter {
-        width: 40px;
-        height: 40px;
-        font-size: 1.1rem;
-        font-weight: bold;
-        background: #f0f0f0;
-        border: 2px solid #ccc;
-        border-radius: 6px;
+        width: 42px;
+        height: 42px;
+        font-size: 0.6rem;
+        font-family: 'Press Start 2P', monospace;
+        background: #1a1a1a;
+        color: #ffffff;
+        border: 2px solid #444;
+        border-radius: 0;
         cursor: pointer;
         text-transform: uppercase;
-        transition: background 0.2s;
+        box-shadow: 2px 2px 0 #000;
+        transition: all 0.1s steps(1);
     }
 
     .btn-letter:hover:not(:disabled) {
-        background: #e0e0e0;
+        background: #ff7b00;
+        color: #000;
+        border-color: #ff7b00;
+        box-shadow: 1px 1px 0 #000;
+        transform: translate(1px, 1px);
     }
 
     .btn-letter:disabled {
-        opacity: 0.3;
+        opacity: 0.2;
         cursor: not-allowed;
+        box-shadow: none;
     }
 </style>

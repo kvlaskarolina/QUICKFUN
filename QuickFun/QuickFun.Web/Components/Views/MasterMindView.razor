@@ -12,16 +12,16 @@
     @if (!isDifficultySelected)
     {
         <div class="difficulty-overlay">
-            <h3>Choose difficulty</h3>
+            <h3 class="overlay-title">— SELECT DIFFICULTY —</h3>
             <div class="difficulty-buttons">
                 <button class="btn-diff easy" @onclick="() => SelectDifficulty(new EasyStrategyMasterMind())">
-                    Easy <small>(4 colors, 4 slots)</small>
+                    EASY <small>4 colors · 4 slots</small>
                 </button>
                 <button class="btn-diff medium" @onclick="() => SelectDifficulty(new MediumStrategyMasterMind())">
-                    Medium <small>(5 colors, 5 slots)</small>
+                    MEDIUM <small>5 colors · 5 slots</small>
                 </button>
                 <button class="btn-diff hard" @onclick="() => SelectDifficulty(new HardStrategyMasterMind())">
-                    Hard <small>(6 colors, 6 slots)</small>
+                    HARD <small>6 colors · 6 slots</small>
                 </button>
             </div>
         </div>
@@ -30,25 +30,23 @@
     {
         <div class="game-header">
             <p class="status-message">@Engine.Message</p>
-            <p class="score">Attempts: @Engine.Score / @Engine.MaxAttempts</p>
+            <p class="score">ATTEMPTS: @Engine.Score / @Engine.MaxAttempts</p>
             <button class="btn-change-level" @onclick="ChangeDifficulty">
-                <span>«</span> Change difficulty
+                « CHANGE LEVEL
             </button>
         </div>
 
-        @* Color palette legend *@
         <div class="color-legend">
             @for (int i = 0; i < Engine.Colors; i++)
             {
                 var letter = ((char)('A' + i)).ToString();
                 <div class="legend-item">
-                    <div class="color-dot" style="background-color: @GetColor(letter)"></div>
+                    <div class="color-dot" style="background-color: @GetColor(letter); box-shadow: 0 0 6px @GetColor(letter);"></div>
                     <span>@letter</span>
                 </div>
             }
         </div>
 
-        @* Guess history *@
         <div class="guess-history">
             @foreach (var (guess, correctPos, correctCol) in Engine.GuessHistory)
             {
@@ -56,18 +54,17 @@
                     <div class="guess-pegs">
                         @foreach (var ch in guess)
                         {
-                            <div class="peg" style="background-color: @GetColor(ch.ToString())">@ch</div>
+                            <div class="peg" style="background-color: @GetColor(ch.ToString()); box-shadow: 0 0 8px @GetColor(ch.ToString());">@ch</div>
                         }
                     </div>
                     <div class="feedback">
-                        <span class="feedback-black" title="Correct position">⬛ @correctPos</span>
-                        <span class="feedback-white" title="Correct color, wrong position">⬜ @correctCol</span>
+                        <span class="feedback-black">■ @correctPos</span>
+                        <span class="feedback-white">□ @correctCol</span>
                     </div>
                 </div>
             }
         </div>
 
-        @* Input area *@
         @if (!Engine.IsGameOver)
         {
             <div class="input-area">
@@ -86,14 +83,14 @@
                     }
                 </div>
                 <button class="btn-submit" @onclick="SubmitGuess" disabled="@(!IsGuessComplete())">
-                    Submit Guess
+                    ▶ SUBMIT
                 </button>
             </div>
         }
         else
         {
             <div class="game-over-actions">
-                <button class="btn-play-again" @onclick="PlayAgain">Play Again</button>
+                <button class="btn-play-again" @onclick="PlayAgain">▶ PLAY AGAIN</button>
             </div>
         }
     }
@@ -132,7 +129,7 @@
     }
 
     private bool IsGuessComplete() =>
-    currentGuess.Length == Engine.CodeLength && currentGuess.All(c => !string.IsNullOrEmpty(c));
+        currentGuess.Length == Engine.CodeLength && currentGuess.All(c => !string.IsNullOrEmpty(c));
 
     private async Task SubmitGuess()
     {
@@ -144,11 +141,7 @@
 
     private async void HandleSaveScore(int finalScore)
     {
-        var result = new GameResult
-        {
-            Type = Engine.Type,
-            Score = finalScore
-        };
+        var result = new GameResult { Type = Engine.Type, Score = finalScore };
         await SessionService.AddGameResultAsync(result);
         await InvokeAsync(StateHasChanged);
     }
@@ -161,7 +154,7 @@
         "D" => "#f39c12",
         "E" => "#9b59b6",
         "F" => "#1abc9c",
-        _ => "#aaaaaa"
+        _ => "#555555"
     };
 }
 
@@ -171,101 +164,97 @@
         max-width: 520px;
         margin: 0 auto;
         padding-bottom: 45px;
-        font-family: sans-serif;
+        font-family: 'Press Start 2P', monospace;
+        background: #0a0a0a;
+        color: #ffffff;
     }
 
-    /* --- Difficulty Screen --- */
+    /* DIFFICULTY SCREEN */
     .difficulty-overlay {
         text-align: center;
-        padding: 20px;
+        padding: 30px 20px;
+    }
+
+    .overlay-title {
+        font-size: 0.7rem;
+        color: #ffe600;
+        letter-spacing: 0.1em;
+        text-shadow: 2px 2px 0 #b38f00;
+        margin-bottom: 24px;
     }
 
     .difficulty-buttons {
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 12px;
         margin-top: 15px;
     }
 
     .btn-diff {
-        padding: 15px;
+        padding: 16px;
         border: none;
-        border-radius: 8px;
-        font-weight: bold;
-        color: white;
+        border-radius: 0;
+        font-family: 'Press Start 2P', monospace;
+        font-size: 0.65rem;
+        color: #000;
         cursor: pointer;
-        transition: transform 0.2s;
-        font-size: 1.1rem;
+        box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+        transition: all 0.1s steps(1);
+        letter-spacing: 0.05em;
     }
 
-    .btn-diff:hover {
-        transform: scale(1.02);
-    }
+    .btn-diff:hover { transform: translate(2px,2px); box-shadow: 2px 2px 0 rgba(0,0,0,0.5); }
+    .btn-diff small { display: block; font-size: 0.45rem; margin-top: 6px; opacity: 0.8; font-family: 'Press Start 2P', monospace; }
 
-    .btn-diff small {
-        display: block;
-        font-weight: normal;
-        opacity: 0.8;
-        font-size: 0.8rem;
-    }
+    .easy   { background: #2ecc71; }
+    .medium { background: #f39c12; }
+    .hard   { background: #e74c3c; color: #fff; }
 
-    .easy {
-        background-color: #27ae60;
-    }
-
-    .medium {
-        background-color: #f39c12;
-    }
-
-    .hard {
-        background-color: #e74c3c;
-    }
-
-    /* --- Game Header --- */
-    .game-header {
-        text-align: center;
-        margin-bottom: 12px;
-    }
+    /* GAME HEADER */
+    .game-header { text-align: center; margin-bottom: 16px; }
 
     .status-message {
-        font-size: 1.1rem;
-        font-weight: bold;
-        margin-bottom: 4px;
+        font-size: 0.6rem;
+        color: #ff7b00;
+        text-shadow: 0 0 8px rgba(255,123,0,0.5);
+        margin-bottom: 6px;
         min-height: 1.5em;
+        letter-spacing: 0.05em;
     }
 
     .score {
-        color: #666;
-        margin-bottom: 8px;
-        font-size: 0.95rem;
+        font-size: 0.55rem;
+        color: #ffe600;
+        margin-bottom: 10px;
+        letter-spacing: 0.08em;
     }
 
     .btn-change-level {
-        background-color: #0086fc;
-        color: white;
-        border: none;
+        background: #1a1a1a;
+        color: #ffe600;
+        border: 2px solid #ffe600;
         padding: 8px 16px;
-        border-radius: 4px;
-        font-weight: bold;
+        font-family: 'Press Start 2P', monospace;
+        font-size: 0.5rem;
         cursor: pointer;
-        font-size: 0.9rem;
-        transition: background-color 0.2s, transform 0.1s;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
+        box-shadow: 2px 2px 0 #b38f00;
+        transition: all 0.1s steps(1);
+        letter-spacing: 0.05em;
     }
 
     .btn-change-level:hover {
-        background-color: #5a6268;
-        transform: translateY(-1px);
+        background: #ffe600;
+        color: #000;
+        box-shadow: 1px 1px 0 #b38f00;
+        transform: translate(1px,1px);
     }
 
-    /* --- Color Legend --- */
+    /* COLOR LEGEND */
     .color-legend {
         display: flex;
         justify-content: center;
-        gap: 10px;
-        margin-bottom: 14px;
+        gap: 12px;
+        margin-bottom: 16px;
         flex-wrap: wrap;
     }
 
@@ -273,20 +262,19 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 3px;
-        font-size: 0.8rem;
-        font-weight: bold;
-        color: #444;
+        gap: 4px;
+        font-size: 0.5rem;
+        color: #aaa;
     }
 
     .color-dot {
         width: 22px;
         height: 22px;
         border-radius: 50%;
-        border: 2px solid rgba(0, 0, 0, 0.15);
+        border: 2px solid rgba(255,255,255,0.2);
     }
 
-    /* --- Guess History --- */
+    /* GUESS HISTORY */
     .guess-history {
         display: flex;
         flex-direction: column;
@@ -294,126 +282,115 @@
         margin-bottom: 16px;
         max-height: 340px;
         overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: #ffe600 #111;
     }
 
     .guess-row {
         display: flex;
         align-items: center;
         gap: 12px;
-        background: #f4f4f4;
-        border-radius: 8px;
-        padding: 6px 10px;
+        background: #111;
+        border: 1px solid #222;
+        padding: 8px 10px;
     }
 
-    .guess-pegs {
-        display: flex;
-        gap: 6px;
-    }
+    .guess-pegs { display: flex; gap: 6px; }
 
     .peg {
         width: 36px;
         height: 36px;
         border-radius: 50%;
-        border: 2px solid rgba(0, 0, 0, 0.2);
+        border: 2px solid rgba(255,255,255,0.15);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-weight: bold;
-        color: white;
-        font-size: 0.9rem;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+        font-size: 0.5rem;
+        font-family: 'Press Start 2P', monospace;
+        color: #fff;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.8);
     }
 
     .feedback {
         display: flex;
         flex-direction: column;
-        gap: 2px;
-        font-size: 0.85rem;
-        min-width: 70px;
+        gap: 4px;
+        font-size: 0.5rem;
     }
 
-    .feedback-black {
-        color: #222;
-        font-weight: bold;
-    }
+    .feedback-black { color: #ffe600; }
+    .feedback-white { color: #555; }
 
-    .feedback-white {
-        color: #888;
-    }
-
-    /* --- Guess Input --- */
+    /* INPUT */
     .input-area {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 12px;
-        margin-top: 8px;
+        gap: 14px;
+        margin-top: 10px;
     }
 
-    .peg-input {
-        display: flex;
-        gap: 8px;
-    }
+    .peg-input { display: flex; gap: 8px; }
 
     .peg-select {
         width: 52px;
         height: 48px;
-        border-radius: 6px;
-        border: 2px solid #ccc;
-        font-size: 1rem;
+        border-radius: 0;
+        border: 2px solid #444;
+        font-size: 0.6rem;
+        font-family: 'Press Start 2P', monospace;
         font-weight: bold;
         text-align: center;
         cursor: pointer;
-        background: white;
+        background: #111;
+        color: #fff;
+        transition: border-color 0.1s;
     }
 
-    .peg-select:focus {
-        outline: none;
-        border-color: #3498db;
-    }
+    .peg-select:focus { outline: none; border-color: #ffe600; }
 
     .btn-submit {
-        background-color: #2ecc71;
-        color: white;
+        background: #ffe600;
+        color: #000;
         border: none;
-        padding: 10px 28px;
-        border-radius: 6px;
-        font-size: 1rem;
-        font-weight: bold;
+        padding: 12px 28px;
+        font-family: 'Press Start 2P', monospace;
+        font-size: 0.6rem;
         cursor: pointer;
-        transition: background-color 0.2s, transform 0.1s;
+        box-shadow: 3px 3px 0 #b38f00;
+        transition: all 0.1s steps(1);
+        letter-spacing: 0.05em;
     }
 
     .btn-submit:hover:not(:disabled) {
-        background-color: #27ae60;
-        transform: translateY(-1px);
+        background: #ff7b00;
+        color: #fff;
+        box-shadow: 1px 1px 0 #b35000;
+        transform: translate(2px,2px);
     }
 
-    .btn-submit:disabled {
-        background-color: #aaa;
-        cursor: not-allowed;
-    }
+    .btn-submit:disabled { background: #333; color: #555; cursor: not-allowed; box-shadow: none; }
 
-    /* --- Game Over --- */
-    .game-over-actions {
-        text-align: center;
-        margin-top: 16px;
-    }
+    /* GAME OVER */
+    .game-over-actions { text-align: center; margin-top: 20px; }
 
     .btn-play-again {
-        background-color: #3498db;
-        color: white;
+        background: #ff7b00;
+        color: #fff;
         border: none;
-        padding: 12px 32px;
-        border-radius: 6px;
-        font-size: 1rem;
-        font-weight: bold;
+        padding: 14px 32px;
+        font-family: 'Press Start 2P', monospace;
+        font-size: 0.6rem;
         cursor: pointer;
-        transition: background-color 0.2s, transform 0.1s;
+        box-shadow: 3px 3px 0 #b35000;
+        transition: all 0.1s steps(1);
+        letter-spacing: 0.05em;
     }
 
     .btn-play-again:hover {
-        background-color: #2980b9;
-        transform: translateY(-1px);
+        background: #ffe600;
+        color: #000;
+        box-shadow: 1px 1px 0 #b38f00;
+        transform: translate(2px,2px);
     }
 </style>

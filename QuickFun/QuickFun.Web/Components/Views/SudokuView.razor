@@ -12,23 +12,27 @@
     @if (Engine.IsLoading)
     {
         <div class="loading-status">
-            <div class="spinner-border text-primary" role="status"></div>
-            <p>Generating...</p>
+            <p class="loading-text">GENERATING...</p>
         </div>
     }
     else if (Engine.Board == null)
     {
         <div class="difficulty-selection">
-            <h3>Choose difficulty</h3>
+            <h3 class="overlay-title">— SELECT DIFFICULTY —</h3>
             <div class="difficulty-buttons">
-                <button class="btn-diff easy" @onclick=@(() => SelectDifficulty("easy"))>Easy</button>
-                <button class="btn-diff medium" @onclick=@(() => SelectDifficulty("medium"))>Medium</button>
-                <button class="btn-diff hard" @onclick=@(() => SelectDifficulty("hard"))>Hard</button>
+                <button class="btn-diff easy" @onclick=@(() => SelectDifficulty("easy"))>EASY</button>
+                <button class="btn-diff medium" @onclick=@(() => SelectDifficulty("medium"))>MEDIUM</button>
+                <button class="btn-diff hard" @onclick=@(() => SelectDifficulty("hard"))>HARD</button>
             </div>
         </div>
     }
     else
     {
+        <div class="sudoku-info">
+            <span class="result-text">@Engine.Result</span>
+            <span class="score-text">SCORE: @Engine.Score</span>
+        </div>
+
         <table class="sudoku-table">
             @for (int r = 0; r < 9; r++)
             {
@@ -54,12 +58,11 @@
                 </tr>
             }
         </table>
-        <button class="btn btn-secondary mt-3" @onclick="() => Engine.Reset()">Change difficulty</button>
-        <button class="btn btn-primary mt-3 ml-2" @onclick="() => Engine.CheckWin()">Check</button>
-        <h3>@Engine.Result</h3>
-        <h3>Score: @Engine.Score</h3>
 
-
+        <div class="sudoku-actions">
+            <button class="btn-action secondary" @onclick="() => Engine.Reset()">« CHANGE LEVEL</button>
+            <button class="btn-action primary" @onclick="() => Engine.CheckWin()">▶ CHECK</button>
+        </div>
     }
 </div>
 
@@ -67,34 +70,137 @@
     .sudoku-container {
         text-align: center;
         padding: 20px;
+        font-family: 'Press Start 2P', monospace;
+        background: #0a0a0a;
+        color: #ffffff;
+        min-height: 100%;
     }
 
+    /* LOADING */
+    .loading-text {
+        font-size: 0.6rem;
+        color: #ffe600;
+        animation: blink 1s steps(1) infinite;
+        letter-spacing: 0.1em;
+    }
+
+    blink {
+
+        0%,
+        100% {
+            opacity: 1
+        }
+
+        50% {
+            opacity: 0
+        }
+    }
+
+    /* DIFFICULTY */
+    .overlay-title {
+        font-size: 0.7rem;
+        color: #ffe600;
+        letter-spacing: 0.1em;
+        text-shadow: 2px 2px 0 #b38f00;
+        margin-bottom: 24px;
+    }
+
+    .difficulty-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 15px;
+        max-width: 300px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .btn-diff {
+        padding: 16px;
+        border: none;
+        border-radius: 0;
+        font-family: 'Press Start 2P', monospace;
+        font-size: 0.65rem;
+        color: #000;
+        cursor: pointer;
+        box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5);
+        transition: all 0.1s steps(1);
+        letter-spacing: 0.05em;
+    }
+
+    .btn-diff:hover {
+        transform: translate(2px, 2px);
+        box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+    }
+
+    .easy {
+        background: #2ecc71;
+    }
+
+    .medium {
+        background: #f39c12;
+    }
+
+    .hard {
+        background: #e74c3c;
+        color: #fff;
+    }
+
+    /* INFO */
+    .sudoku-info {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+    }
+
+    .result-text {
+        font-size: 0.55rem;
+        color: #ff7b00;
+        text-shadow: 0 0 8px rgba(255, 123, 0, 0.5);
+        letter-spacing: 0.05em;
+        min-height: 1em;
+    }
+
+    .score-text {
+        font-size: 0.55rem;
+        color: #ffe600;
+        letter-spacing: 0.08em;
+    }
+
+    /* TABLE */
     .sudoku-table {
-        border: 3px solid #333;
+        border: 3px solid #ffe600;
         margin: auto;
         border-collapse: collapse;
+        box-shadow: 0 0 16px rgba(255, 230, 0, 0.15);
     }
 
     .sudoku-table td {
-        width: 45px;
-        height: 45px;
-        border: 1px solid #ccc;
+        width: 44px;
+        height: 44px;
+        border: 1px solid #2a2a2a;
         padding: 0;
+        background: #111;
     }
 
-    /* Sekcje 3x3 */
     .sudoku-table td:nth-child(3n) {
-        border-right: 3px solid #333;
+        border-right: 3px solid #ffe600;
     }
 
     .sudoku-table tr:nth-child(3n) td {
-        border-bottom: 3px solid #333;
+        border-bottom: 3px solid #ffe600;
     }
 
     .cell-fixed {
-        background-color: #eee;
-        font-weight: bold;
-        font-size: 1.2rem;
+        background: #1a1a1a !important;
+        font-size: 1rem;
+        font-family: 'Press Start 2P', monospace;
+        color: #ffe600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .sudoku-table input {
@@ -102,40 +208,71 @@
         height: 100%;
         border: none;
         text-align: center;
-        font-size: 1.2rem;
+        font-size: 0.85rem;
+        font-family: 'Press Start 2P', monospace;
         background: transparent;
         outline: none;
+        color: #ffffff;
+        caret-color: #ff7b00;
+    }
+
+    .sudoku-table input:focus {
+        background: rgba(255, 123, 0, 0.1);
     }
 
     .sudoku-table input::-webkit-inner-spin-button {
         -webkit-appearance: none;
     }
 
-    .btn-diff {
-        padding: 15px;
+    /* ACTIONS */
+    .sudoku-actions {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+    }
+
+    .btn-action {
+        padding: 12px 20px;
+        font-family: 'Press Start 2P', monospace;
+        font-size: 0.55rem;
         border: none;
-        border-radius: 8px;
-        font-weight: bold;
-        color: white;
         cursor: pointer;
-        transition: transform 0.2s;
-        font-size: 1.1rem;
+        box-shadow: 3px 3px 0;
+        transition: all 0.1s steps(1);
+        letter-spacing: 0.05em;
     }
 
-    .btn-diff:hover {
-        transform: scale(1.02);
+    .btn-action:hover {
+        transform: translate(2px, 2px);
+        box-shadow: 1px 1px 0;
     }
 
-    .easy {
-        background-color: #27ae60;
+    .btn-action.primary {
+        background: #ffe600;
+        color: #000;
+        box-shadow-color: #b38f00;
+        box-shadow: 3px 3px 0 #b38f00;
     }
 
-    .medium {
-        background-color: #f39c12;
+    .btn-action.secondary {
+        background: #1a1a1a;
+        color: #ffe600;
+        border: 2px solid #ffe600;
+        box-shadow: 3px 3px 0 #b38f00;
     }
 
-    .hard {
-        background-color: #e74c3c;
+    .btn-action.primary:hover {
+        background: #ff7b00;
+        color: #fff;
+        box-shadow: 1px 1px 0 #b35000;
+    }
+
+    .btn-action.secondary:hover {
+        background: #ffe600;
+        color: #000;
+        box-shadow: 1px 1px 0 #b38f00;
     }
 </style>
 
@@ -158,6 +295,7 @@
             Engine.UpdateCell(r, c, 0);
         }
     }
+
     protected override void OnParametersSet()
     {
         Engine.OnGameFinished -= HandleSaveScore;
@@ -166,14 +304,11 @@
 
     private async void HandleSaveScore(int finalScore)
     {
-        var result = new GameResult
-        {
-            Type = Engine.Type,
-            Score = finalScore
-        };
+        var result = new GameResult { Type = Engine.Type, Score = finalScore };
         await SessionService.AddGameResultAsync(result);
         await InvokeAsync(StateHasChanged);
     }
+
     public void Dispose()
     {
         if (Engine != null) Engine.OnGameFinished -= HandleSaveScore;

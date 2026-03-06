@@ -1,5 +1,64 @@
-﻿@page "/not-found"
+@page "/not-found"
 @layout MainLayout
 
-<h3>Not Found</h3>
-<p>Sorry, the content you are looking for does not exist.</p>
+<div class="notfound-container">
+    <p class="code">404</p>
+    <h3 class="title">PAGE NOT FOUND</h3>
+    <p class="subtitle">SORRY, THIS CONTENT DOES NOT EXIST.</p>
+    <a href="/" class="btn-home">« GO HOME</a>
+</div>
+
+<style>
+    .notfound-container {
+        text-align: center;
+        padding: 60px 20px;
+        font-family: 'Press Start 2P', monospace;
+        color: #ffffff;
+        background: #0a0a0a;
+        min-height: 100%;
+    }
+
+    .code {
+        font-size: 5rem;
+        color: #e74c3c;
+        text-shadow: 4px 4px 0 #7b1c12, 0 0 30px rgba(231,76,60,0.4);
+        margin-bottom: 16px;
+        line-height: 1;
+    }
+
+    .title {
+        font-size: 0.8rem;
+        color: #ffe600;
+        text-shadow: 2px 2px 0 #b38f00;
+        letter-spacing: 0.1em;
+        margin-bottom: 14px;
+    }
+
+    .subtitle {
+        font-size: 0.45rem;
+        color: #555;
+        letter-spacing: 0.1em;
+        margin-bottom: 32px;
+    }
+
+    .btn-home {
+        display: inline-block;
+        padding: 12px 24px;
+        background: #ffe600;
+        color: #000;
+        text-decoration: none;
+        font-family: 'Press Start 2P', monospace;
+        font-size: 0.55rem;
+        box-shadow: 3px 3px 0 #b38f00;
+        transition: all 0.1s steps(1);
+        letter-spacing: 0.05em;
+    }
+
+    .btn-home:hover {
+        background: #ff7b00;
+        color: #fff;
+        box-shadow: 1px 1px 0 #b35000;
+        transform: translate(2px, 2px);
+        text-decoration: none;
+    }
+</style>

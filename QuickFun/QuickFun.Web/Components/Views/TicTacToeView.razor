@@ -9,23 +9,24 @@
 
 <div class="game-container">
     <p class="status-message">@Engine.Message</p>
-    <h3>Score: @Engine.Score</h3>
+    <p class="score-text">SCORE: @Engine.Score</p>
 
     <div class="board">
         @for (int i = 0; i < 9; i++)
         {
             int localIndex = i;
-            <button class="cell @(Engine.Board[i] != '\0' ? "occupied" : "")" @onclick="() => HandleClick(localIndex)"
+            var symbol = Engine.Board[i];
+            <button class="cell @(symbol == 'X' ? "cell-x" : symbol == 'O' ? "cell-o" : "")"
+                @onclick="() => HandleClick(localIndex)"
                 disabled="@Engine.IsGameOver">
-                @Engine.Board[i]
+                @(symbol != '\0' ? symbol.ToString() : "")
             </button>
         }
     </div>
 </div>
 
 @code {
-    [Parameter]
-    public TicTacToeEngine Engine { get; set; }
+    [Parameter] public TicTacToeEngine Engine { get; set; }
 
     private async Task HandleClick(int index)
     {
@@ -45,29 +46,63 @@
 }
 
 <style>
+    .game-container {
+        max-width: 420px;
+        margin: 0 auto;
+        padding: 24px 20px;
+        text-align: center;
+        background: #0a0a0a;
+        font-family: 'Press Start 2P', monospace;
+        color: #ffffff;
+    }
+
+    .status-message {
+        font-size: 0.6rem;
+        color: #ff7b00;
+        text-shadow: 0 0 8px rgba(255,123,0,0.5);
+        min-height: 2rem;
+        margin-bottom: 6px;
+        letter-spacing: 0.05em;
+    }
+
+    .score-text {
+        font-size: 0.55rem;
+        color: #ffe600;
+        margin-bottom: 16px;
+        letter-spacing: 0.08em;
+    }
+
     .board {
         display: grid;
         grid-template-columns: repeat(3, 100px);
-        gap: 10px;
+        gap: 8px;
         justify-content: center;
-        margin: 20px auto;
+        margin: 0 auto;
     }
 
     .cell {
         width: 100px;
         height: 100px;
-        font-size: 2.5rem;
-        font-weight: bold;
+        font-size: 2rem;
+        font-family: 'Press Start 2P', monospace;
         cursor: pointer;
-        background: #f0f0f0;
-        border: 2px solid #ccc;
-        border-radius: 8px;
+        background: #1a1a1a;
+        border: 2px solid #333;
+        border-radius: 0;
+        color: #ffffff;
+        box-shadow: 3px 3px 0 #000;
+        transition: all 0.1s steps(1);
     }
 
-    .status-message {
-        font-size: 1.5rem;
-        color: #333;
-        height: 2rem;
-        text-align: center;
+    .cell:hover:not(:disabled) {
+        background: rgba(255,123,0,0.15);
+        border-color: #ff7b00;
+        box-shadow: 1px 1px 0 #000;
+        transform: translate(2px,2px);
     }
+
+    .cell:disabled { cursor: not-allowed; }
+
+    .cell-x { color: #ff7b00; text-shadow: 0 0 10px rgba(255,123,0,0.6); border-color: #ff7b00; }
+    .cell-o { color: #ffe600; text-shadow: 0 0 10px rgba(255,230,0,0.6); border-color: #ffe600; }
 </style>

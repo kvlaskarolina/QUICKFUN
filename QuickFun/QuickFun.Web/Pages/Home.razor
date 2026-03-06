@@ -1,28 +1,106 @@
-﻿@page "/"
+@page "/"
 @using QuickFun.Web.Layout.ProductSliderComponent
 @using QuickFun.Web.ViewModels
 @inject HomeViewModel VM
 
-<PageTitle>Home</PageTitle>
+<PageTitle>QuickFun</PageTitle>
 
-@if (!string.IsNullOrEmpty(VM.Nickname))
-{
-    <h1>Hello, @VM.Nickname!</h1>
-    <p>Great to see you again. Ready to break some records?</p>
-}
-else
-{
-    <h1>Hello, world!</h1>
-    <p>Try our amazing games. <a href="/login">Log in</a> to save your scores!</p>
-}
+<div class="home-container">
+    @if (!string.IsNullOrEmpty(VM.Nickname))
+    {
+        <div class="welcome-box">
+            <p class="welcome-label">PLAYER</p>
+            <h1 class="welcome-name">@VM.Nickname.ToUpper()</h1>
+            <p class="welcome-sub">READY TO BREAK SOME RECORDS?</p>
+        </div>
+    }
+    else
+    {
+        <div class="welcome-box guest">
+            <p class="welcome-label">WELCOME TO</p>
+            <h1 class="welcome-title">QUICKFUN</h1>
+            <p class="welcome-sub">
+                <a href="/login" class="link-highlight">LOG IN</a>
+                <span> TO SAVE YOUR SCORES</span>
+            </p>
+        </div>
+    }
 
-<ProductSlider />
+    <ProductSlider />
+</div>
 
-@code
-{
-    //widok tylko inicjalizuje na starcie
+@code {
     protected override async Task OnInitializedAsync()
     {
         await VM.InitializeAsync();
     }
 }
+
+<style>
+    .home-container {
+        font-family: 'Press Start 2P', monospace;
+        padding: 30px 20px;
+        color: #ffffff;
+        background: #0a0a0a;
+        min-height: 100%;
+    }
+
+    .welcome-box {
+        text-align: center;
+        margin-bottom: 40px;
+        padding: 28px;
+        border: 2px solid #ffe600;
+        background: #0d0d0d;
+        box-shadow: 6px 6px 0 #b38f00;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 40px;
+    }
+
+    .welcome-box.guest {
+        border-color: #333;
+        box-shadow: 6px 6px 0 #111;
+    }
+
+    .welcome-label {
+        font-size: 0.45rem;
+        color: #888;
+        letter-spacing: 0.2em;
+        margin-bottom: 8px;
+    }
+
+    .welcome-name {
+        font-size: 1.4rem;
+        color: #ffe600;
+        text-shadow: 3px 3px 0 #b38f00, 0 0 20px rgba(255,230,0,0.4);
+        margin-bottom: 12px;
+        letter-spacing: 0.05em;
+    }
+
+    .welcome-title {
+        font-size: 1.6rem;
+        color: #ffe600;
+        text-shadow: 3px 3px 0 #b38f00, 0 0 20px rgba(255,230,0,0.4);
+        margin-bottom: 12px;
+        letter-spacing: 0.08em;
+    }
+
+    .welcome-sub {
+        font-size: 0.45rem;
+        color: #888;
+        letter-spacing: 0.1em;
+        margin: 0;
+    }
+
+    .link-highlight {
+        color: #ff7b00;
+        text-decoration: none;
+        text-shadow: 0 0 8px rgba(255,123,0,0.5);
+    }
+
+    .link-highlight:hover {
+        color: #ffe600;
+        text-decoration: none;
+    }
+</style>

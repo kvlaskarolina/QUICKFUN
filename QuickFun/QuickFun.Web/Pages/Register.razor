@@ -2,52 +2,159 @@
 @using QuickFun.Web.ViewModels
 @inject RegisterViewModel VM
 
-
 <div class="auth-container">
-    <h2>Create Account</h2>
+    <h2 class="auth-title">CREATE ACCOUNT</h2>
+    <p class="auth-subtitle">JOIN THE GAME</p>
 
     <div class="input-group">
-        <label>Email</label>
-        <input @bind="VM.email" type="email" placeholder="Enter your email" />
+        <label>EMAIL</label>
+        <input @bind="VM.email" type="email" placeholder="your@email.com" />
     </div>
 
     <div class="input-group">
-        <label>Login (Username)</label>
-        <input @bind="VM.username" type="text" placeholder="Enter username" />
+        <label>USERNAME</label>
+        <input @bind="VM.username" type="text" placeholder="player_one" />
     </div>
 
     <div class="input-group">
-        <label>Password</label>
-        <input @bind="VM.password" type="password" placeholder="Enter password" />
+        <label>PASSWORD</label>
+        <input @bind="VM.password" type="password" placeholder="••••••••" />
     </div>
 
-    <button class="btn-submit" @onclick="VM.HandleRegister">Sign up</button>
+    <button class="btn-submit" @onclick="VM.HandleRegister">▶ SIGN UP</button>
 
     @if (!string.IsNullOrEmpty(VM.errorMessage))
     {
-        <p class="error-msg">@VM.errorMessage</p>
+        <p class="error-msg">⚠ @VM.errorMessage</p>
     }
+
     @if (VM.isSuccess)
     {
         <div class="success-msg">
-            Account created successfully! <br />
-            <a href="/login">Click here to log in.</a>
+            <p>✓ ACCOUNT CREATED!</p>
+            <a href="/login" class="auth-link">▶ LOG IN NOW</a>
         </div>
     }
+
+    <p class="auth-footer">HAVE AN ACCOUNT? <a href="/login" class="auth-link">LOG IN</a></p>
 </div>
 
-@code
-{
-
-}
+@code { }
 
 <style>
-    .auth-container { max-width: 400px; margin: 50px auto; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); background: white; text-align: center; }
-    .input-group { margin-bottom: 20px; text-align: left; }
-    .input-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-    .input-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-    .btn-submit { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
-    .btn-submit:hover { background: #218838; }
-    .error-msg { color: red; margin-top: 15px; }
-    .success-msg { color: green; margin-top: 15px; font-weight: bold; }
+    .auth-container {
+        max-width: 400px;
+        margin: 50px auto;
+        padding: 36px 32px;
+        background: #0d0d0d;
+        border: 2px solid #ffe600;
+        box-shadow: 6px 6px 0 #b38f00;
+        text-align: center;
+        font-family: 'Press Start 2P', monospace;
+        color: #ffffff;
+    }
+
+    .auth-title {
+        font-size: 1rem;
+        color: #ffe600;
+        text-shadow: 2px 2px 0 #b38f00;
+        margin-bottom: 6px;
+        letter-spacing: 0.1em;
+    }
+
+    .auth-subtitle {
+        font-size: 0.4rem;
+        color: #555;
+        margin-bottom: 28px;
+        letter-spacing: 0.15em;
+    }
+
+    .input-group {
+        margin-bottom: 18px;
+        text-align: left;
+    }
+
+    .input-group label {
+        display: block;
+        font-size: 0.45rem;
+        color: #888;
+        letter-spacing: 0.1em;
+        margin-bottom: 8px;
+    }
+
+    .input-group input {
+        width: 100%;
+        padding: 12px 10px;
+        border: 2px solid #333;
+        background: #111;
+        color: #ffffff;
+        font-family: 'Press Start 2P', monospace;
+        font-size: 0.5rem;
+        box-sizing: border-box;
+        outline: none;
+        transition: border-color 0.1s steps(1);
+    }
+
+    .input-group input:focus { border-color: #ff7b00; }
+    .input-group input::placeholder { color: #333; }
+
+    .btn-submit {
+        width: 100%;
+        padding: 14px;
+        background: #ffe600;
+        color: #000;
+        border: none;
+        font-family: 'Press Start 2P', monospace;
+        font-size: 0.6rem;
+        cursor: pointer;
+        box-shadow: 3px 3px 0 #b38f00;
+        transition: all 0.1s steps(1);
+        letter-spacing: 0.05em;
+        margin-top: 8px;
+    }
+
+    .btn-submit:hover {
+        background: #ff7b00;
+        color: #fff;
+        box-shadow: 1px 1px 0 #b35000;
+        transform: translate(2px, 2px);
+    }
+
+    .error-msg {
+        font-size: 0.45rem;
+        color: #e74c3c;
+        margin-top: 14px;
+        letter-spacing: 0.05em;
+        line-height: 1.6;
+    }
+
+    .success-msg {
+        background: #0a1a0a;
+        border: 2px solid #2ecc71;
+        padding: 16px;
+        margin-top: 16px;
+        box-shadow: 2px 2px 0 #1a6b30;
+    }
+
+    .success-msg p {
+        font-size: 0.5rem;
+        color: #2ecc71;
+        margin-bottom: 10px;
+        letter-spacing: 0.08em;
+    }
+
+    .auth-footer {
+        font-size: 0.4rem;
+        color: #555;
+        margin-top: 20px;
+        letter-spacing: 0.08em;
+    }
+
+    .auth-link {
+        color: #ff7b00;
+        text-decoration: none;
+        text-shadow: 0 0 6px rgba(255,123,0,0.4);
+    }
+
+    .auth-link:hover { color: #ffe600; text-decoration: none; }
 </style>

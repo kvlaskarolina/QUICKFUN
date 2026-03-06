@@ -5,7 +5,6 @@
 @inject MinesweeperViewModel VM
 
 <div class="saper-container">
-    @* NAGŁÓWEK *@
     <div class="saper-header">
         <div class="status-box">
             <span class="status-text @(VM.Engine.IsWin ? "win-text" : VM.Engine.IsGameOver ? "loss-text" : "")">
@@ -24,7 +23,6 @@
         </div>
     </div>
 
-    @* PLANSZA *@
     <div class="saper-board">
         @for (int r = 0; r < 12; r++)
         {
@@ -36,11 +34,10 @@
                     var cell = VM.Engine.Board[row, col];
 
                     <div class="saper-cell
-                        @(cell.IsRevealed ? "revealed" : "hidden")
-                        @((cell.IsMine && cell.IsRevealed && !VM.Engine.IsWin) ? "mine-loss" : "")
-                        @((cell.IsMine && cell.IsRevealed && VM.Engine.IsWin) ? "mine-win" : "")"
-                        @onclick="() => VM.Engine.HandleClick(row, col)"
-                        @oncontextmenu:preventDefault="true"
+                                                @(cell.IsRevealed ? "revealed" : "hidden")
+                                                @((cell.IsMine && cell.IsRevealed && !VM.Engine.IsWin) ? "mine-loss" : "")
+                                                @((cell.IsMine && cell.IsRevealed && VM.Engine.IsWin) ? "mine-win" : "")"
+                        @onclick="() => VM.Engine.HandleClick(row, col)" @oncontextmenu:preventDefault="true"
                         @oncontextmenu="() => VM.Engine.SwitchFlag(row, col)">
 
                         @if (cell.IsFlagged && !cell.IsRevealed)
@@ -51,7 +48,7 @@
                         {
                             if (cell.IsMine)
                             {
-                                <span class="icon">@("💣")</span>
+                                <span class="icon">💣</span>
                             }
                             else if (cell.AdjMines > 0)
                             {
@@ -64,12 +61,11 @@
         }
     </div>
 
-    @* STOPKA *@
     @if (VM.Engine.IsGameOver)
     {
         <div class="saper-footer">
             <button class="btn-reset" @onclick="Engine.Reset">
-                🔄 Play again
+                ▶ PLAY AGAIN
             </button>
         </div>
     }
@@ -82,9 +78,10 @@
     {
         VM.SetEngine(Engine);
         VM.OnNotifyView += HandleUpdate;
-
     }
+
     private void HandleUpdate() => InvokeAsync(StateHasChanged);
+
     public void Dispose()
     {
         VM.OnNotifyView -= HandleUpdate;
@@ -97,105 +94,171 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        background-color: #e0e0e0;
+        background: #0a0a0a;
         padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        border: 2px solid #333;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
         user-select: none;
         max-width: fit-content;
         margin: 0 auto;
+        font-family: 'Press Start 2P', monospace;
     }
 
     .saper-header {
         width: 100%;
-        margin-bottom: 15px;
+        margin-bottom: 16px;
         text-align: center;
     }
 
     .status-text {
-        font-size: 1.4rem;
-        font-weight: bold;
-        color: #2c3e50;
+        font-size: 0.6rem;
+        color: #ffffff;
         display: block;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
         min-height: 1.6em;
-        transition: transform 0.3s ease;
+        letter-spacing: 0.05em;
     }
 
-    .win-text { color: #000000; transform: scale(1.1); }
-    .loss-text { color: #000000; }
+    .win-text {
+        color: #2ecc71;
+        text-shadow: 0 0 10px rgba(46, 204, 113, 0.6);
+    }
+
+    .loss-text {
+        color: #e74c3c;
+        text-shadow: 0 0 10px rgba(231, 76, 60, 0.6);
+    }
 
     .stats-bar {
         display: flex;
         justify-content: space-around;
-        background: #333;
-        color: #00ff00;
-        font-family: 'Courier New', Courier, monospace;
-        padding: 5px;
-        border-radius: 4px;
-        border: 2px inset #fff;
+        background: #111;
+        color: #ffe600;
+        font-family: 'Press Start 2P', monospace;
+        padding: 8px;
+        border: 2px solid #ffe600;
+        box-shadow: 0 0 8px rgba(255, 230, 0, 0.2);
     }
 
-    .stat-item { display: flex; flex-direction: column; }
-    .stat-item .label { font-size: 0.7rem; color: #aaa; }
-    .stat-item .value { font-size: 1.2rem; font-weight: bold; }
+    .stat-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .stat-item .label {
+        font-size: 0.4rem;
+        color: #888;
+        letter-spacing: 0.1em;
+    }
+
+    .stat-item .value {
+        font-size: 0.9rem;
+        color: #ffe600;
+    }
 
     .saper-board {
-        border: 4px inset #ffffff;
-        background-color: #7b7b7b;
-        padding: 2px;
+        border: 3px solid #ffe600;
+        background: #111;
+        padding: 3px;
+        box-shadow: 0 0 12px rgba(255, 230, 0, 0.15);
     }
 
-    .saper-row { display: flex; }
+    .saper-row {
+        display: flex;
+    }
 
     .saper-cell {
-        width: 35px;
-        height: 35px;
+        width: 34px;
+        height: 34px;
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: bold;
-        font-size: 1.2rem;
+        font-size: 0.7rem;
         cursor: pointer;
         box-sizing: border-box;
-        transition: background-color 0.1s;
+        transition: background-color 0.05s;
+        font-family: 'Press Start 2P', monospace;
     }
 
     .hidden {
-        background-color: #bdbdbd;
-        border: 3px outset #ffffff;
+        background: #222;
+        border: 2px solid #444;
+        box-shadow: inset -1px -1px 0 #111, inset 1px 1px 0 #333;
+    }
+
+    .hidden:hover {
+        background: #ff7b00;
+        border-color: #ff7b00;
     }
 
     .revealed {
-        background-color: #bdbdbd;
-        border: 1px solid #7b7b7b;
+        background: #111;
+        border: 1px solid #1e1e1e;
     }
 
     .mine-loss {
-        background-color: #ff3e3e !important;
-        border: 1px solid #b33939;
+        background: #e74c3c !important;
+        border: 1px solid #c0392b;
     }
 
     .mine-win {
-        background-color: #06a165 !important;
-        border: 1px solid #6c5ce7;
+        background: #2ecc71 !important;
+        border: 1px solid #27ae60;
     }
 
-    .n-1 { color: #0984e3; }
-    .n-2 { color: #00b894; }
-    .n-3 { color: #d63031; }
-    .n-4 { color: #6c5ce7; }
-    .n-5 { color: #e17055; }
-    .n-6 { color: #00cec9; }
+    .number {
+        font-size: 0.65rem;
+        font-family: 'Press Start 2P', monospace;
+    }
+
+    .n-1 {
+        color: #3498db;
+    }
+
+    .n-2 {
+        color: #2ecc71;
+    }
+
+    .n-3 {
+        color: #e74c3c;
+    }
+
+    .n-4 {
+        color: #9b59b6;
+    }
+
+    .n-5 {
+        color: #f39c12;
+    }
+
+    .n-6 {
+        color: #1abc9c;
+    }
+
+    .saper-footer {
+        margin-top: 16px;
+    }
 
     .btn-reset {
-        padding: 10px 20px;
-        font-weight: bold;
-        background: #2c3e50;
-        color: white;
+        padding: 12px 24px;
+        font-family: 'Press Start 2P', monospace;
+        font-size: 0.6rem;
+        background: #ffe600;
+        color: #000;
         border: none;
-        border-radius: 4px;
         cursor: pointer;
-        margin-top: 20px;
+        box-shadow: 3px 3px 0 #b38f00;
+        transition: all 0.1s steps(1);
+        letter-spacing: 0.05em;
+    }
+
+    .btn-reset:hover {
+        background: #ff7b00;
+        color: #fff;
+        box-shadow: 1px 1px 0 #b35000;
+        transform: translate(2px, 2px);
     }
 </style>

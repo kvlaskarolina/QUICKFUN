@@ -19,14 +19,15 @@
     @if (CurrentGame == null)
     {
         <div class="error-container">
-            <h2>Game not found</h2>
-            <p>we are sorry:(, game "@GameTypeString" does not exists</p>
-            <a href="/" class="btn btn-secondary">Go back to QUICKFUN</a>
+            <p class="error-code">404</p>
+            <h2 class="error-title">GAME NOT FOUND</h2>
+            <p class="error-msg">Sorry, "@GameTypeString" does not exist.</p>
+            <a href="/" class="btn-action secondary">« GO BACK</a>
         </div>
     }
     else
     {
-        <h1 class="game-title">@CurrentGame.Name</h1>
+        <h1 class="game-title">@CurrentGame.Name.ToUpper()</h1>
 
         <div class="game-content">
             @if (CurrentGame is TicTacToeEngineWithAI tttai)
@@ -60,15 +61,14 @@
         </div>
 
         <div class="controls">
-            <button class="btn btn-primary" @onclick="Reset">Restart</button>
-            <button class="btn btn-secondary" @onclick="GoBack">Go back to QUICKFUN</button>
+            <button class="btn-action primary"   @onclick="Reset">▶ RESTART</button>
+            <button class="btn-action secondary"  @onclick="GoBack">« QUICKFUN</button>
         </div>
     }
 </div>
 
 @code {
-    [Parameter]
-    public string? GameTypeString { get; set; }
+    [Parameter] public string? GameTypeString { get; set; }
 
     private IGameEngine? CurrentGame { get; set; }
 
@@ -79,18 +79,11 @@
             CurrentGame = GameFactory.CreateGame(type);
 
             if (CurrentGame is MemoryEngine memory)
-            {
                 await memory.Start(() => InvokeAsync(StateHasChanged));
-            }
-            else if (CurrentGame is HangmanEngine hangman)
-            {
-                // Для Hangman НЕ вызываем Reset автоматически
-                // Пользователь сначала выбирает сложность
-            }
+            else if (CurrentGame is HangmanEngine)
+            { /* user picks difficulty first */ }
             else
-            {
                 CurrentGame.Reset();
-            }
         }
         else
         {
@@ -101,12 +94,9 @@
     private async Task Reset()
     {
         if (CurrentGame == null) return;
-
         CurrentGame.Reset();
-
         if (CurrentGame is MemoryEngine memory)
             await memory.Start(() => InvokeAsync(StateHasChanged));
-
         if (CurrentGame is SudokuEngine sudoku)
             await sudoku.Start(() => InvokeAsync(StateHasChanged));
         if (CurrentGame is MasterMindEngine mastermind)
@@ -114,10 +104,7 @@
         StateHasChanged();
     }
 
-    private void GoBack()
-    {
-        Navigation.NavigateTo("/");
-    }
+    private void GoBack() => Navigation.NavigateTo("/");
 
     private void OnHangmanDifficultyChanged(HangmanDifficulty difficulty)
     {
@@ -129,21 +116,22 @@
 
 <style>
     .game-layout {
-        max-width: 700px;
+        max-width: 760px;
         margin: 2rem auto;
-        padding: 40px;
+        padding: 36px 40px;
         text-align: center;
-        background-color: #ffffff;
-        border-radius: 15px;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-        border: 2px solid #ccc;
+        background: #0a0a0a;
+        border: 2px solid #222;
+        box-shadow: 6px 6px 0 #000;
+        font-family: 'Press Start 2P', monospace;
     }
 
     .game-title {
-        color: #333;
+        color: #ffe600;
         margin-bottom: 1.5rem;
-        font-size: 2.5rem;
-        font-family: sans-serif;
+        font-size: 1.2rem;
+        letter-spacing: 0.08em;
+        text-shadow: 3px 3px 0 #b38f00, 0 0 20px rgba(255,230,0,0.3);
     }
 
     .game-content {
@@ -157,46 +145,71 @@
 
     .controls {
         display: flex;
-        gap: 15px;
+        gap: 14px;
         justify-content: center;
         margin-top: 2rem;
+        flex-wrap: wrap;
     }
 
-    .btn {
-        padding: 12px 25px;
-        border-radius: 8px;
+    .btn-action {
+        padding: 12px 22px;
+        font-family: 'Press Start 2P', monospace;
+        font-size: 0.55rem;
         border: none;
-        font-weight: bold;
         cursor: pointer;
-        transition: transform 0.1s, background-color 0.2s;
-        font-size: 1rem;
-    }
-
-    .btn:active {
-        transform: scale(0.95);
-    }
-
-    .btn-primary {
-        background-color: #28a745;
-        color: white;
-    }
-
-    .btn-primary:hover {
-        background-color: #218838;
-    }
-
-    .btn-secondary {
-        background-color: #6c757d;
-        color: white;
+        box-shadow: 3px 3px 0;
+        transition: all 0.1s steps(1);
+        letter-spacing: 0.05em;
         text-decoration: none;
+        display: inline-block;
     }
 
-    .btn-secondary:hover {
-        background-color: #5a6268;
-        color: white;
+    .btn-action:hover { transform: translate(2px,2px); }
+
+    .btn-action.primary {
+        background: #ffe600;
+        color: #000;
+        box-shadow: 3px 3px 0 #b38f00;
+    }
+    .btn-action.primary:hover {
+        background: #ff7b00;
+        color: #fff;
+        box-shadow: 1px 1px 0 #b35000;
     }
 
-    .error-container {
-        padding: 20px;
+    .btn-action.secondary {
+        background: #1a1a1a;
+        color: #ffe600;
+        border: 2px solid #ffe600;
+        box-shadow: 3px 3px 0 #b38f00;
+    }
+    .btn-action.secondary:hover {
+        background: #ffe600;
+        color: #000;
+        box-shadow: 1px 1px 0 #b38f00;
+    }
+
+    /* ERROR */
+    .error-container { padding: 40px 20px; }
+
+    .error-code {
+        font-size: 4rem;
+        color: #e74c3c;
+        text-shadow: 4px 4px 0 #7b1c12;
+        margin-bottom: 10px;
+    }
+
+    .error-title {
+        font-size: 0.8rem;
+        color: #ffe600;
+        margin-bottom: 12px;
+        letter-spacing: 0.1em;
+    }
+
+    .error-msg {
+        font-size: 0.5rem;
+        color: #888;
+        margin-bottom: 24px;
+        letter-spacing: 0.05em;
     }
 </style>
