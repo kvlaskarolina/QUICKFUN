@@ -1,8 +1,4 @@
-# QUICKFUN
 
-Authors: **Maciej Bajer**, **Karolina Kulas**
-
----
 
 ## TYTUŁ PROJEKTU
 
